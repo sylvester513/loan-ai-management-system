@@ -18,8 +18,8 @@ from pydantic import BaseModel, EmailStr, Field
 
 BASE_DIR = Path(__file__).resolve().parent
 
-# Load local environment variables from backend/.env.
-# On Render, variables are configured in the dashboard.
+# Load local .env file during development.
+# On Render, configure environment variables in the dashboard.
 load_dotenv(BASE_DIR / ".env")
 
 logging.basicConfig(level=logging.INFO)
@@ -50,13 +50,32 @@ app = FastAPI(
 
 
 # ============================================================
-# TEMPORARY CORS CONFIGURATION
-# We will restrict this after deploying the backend.
+# CORS CONFIGURATION — SMARTLEND AI
 # ============================================================
+
+CORS_ORIGINS = [
+    # Production frontend on Netlify
+    "https://smartlend-ai.netlify.app",
+
+    # Local development
+    "http://localhost:63342",
+    "http://127.0.0.1:63342",
+    "http://localhost:5500",
+    "http://127.0.0.1:5500",
+]
+
+# Optional: allow additional trusted origins configured on Render.
+# Separate multiple origins with commas in CORS_ORIGINS.
+extra_origins = os.getenv("CORS_ORIGINS", "")
+
+for origin in extra_origins.split(","):
+    origin = origin.strip().rstrip("/")
+    if origin and origin not in CORS_ORIGINS:
+        CORS_ORIGINS.append(origin)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=CORS_ORIGINS,
     allow_credentials=False,
     allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["*"],
@@ -76,7 +95,9 @@ try:
     model = joblib.load(MODEL_PATH)
 
     if not hasattr(model, "predict"):
-        raise ValueError("Model does not support predict().")
+        raise ValueError(
+            "Model does not support predict()."
+        )
 
     if not hasattr(model, "predict_proba"):
         raise ValueError(
@@ -95,7 +116,7 @@ except Exception:
 # ============================================================
 
 def get_connection():
-    """Connect to the existing Supabase PostgreSQL database."""
+    """Connect securely to the Supabase PostgreSQL database."""
 
     missing = [
         key
@@ -108,20 +129,32 @@ def get_connection():
     ]
 
     if missing:
-        raise RuntimeError(
-            "Missing database environment variables: "
-            + ", ".join(missing)
+        logger.error(
+            "Missing database environment variables: %s",
+            ", ".join(missing)
+        )
+        raise HTTPException(
+            status_code=500,
+            detail="Database configuration is incomplete."
         )
 
-    return psycopg2.connect(
-        host=DB_HOST,
-        port=DB_PORT,
-        database=DB_NAME,
-        user=DB_USER,
-        password=DB_PASSWORD,
-        sslmode=DB_SSLMODE,
-        connect_timeout=10,
-    )
+    try:
+        return psycopg2.connect(
+            host=DB_HOST,
+            port=DB_PORT,
+            database=DB_NAME,
+            user=DB_USER,
+            password=DB_PASSWORD,
+            sslmode=DB_SSLMODE,
+            connect_timeout=10,
+        )
+
+    except psycopg2.Error:
+        logger.exception("Database connection failed.")
+        raise HTTPException(
+            status_code=503,
+            detail="Database connection is unavailable."
+        )
 
 
 # ============================================================
@@ -129,9 +162,17 @@ def get_connection():
 # ============================================================
 
 class LoanApplication(BaseModel):
-    applicant_name: str = Field(min_length=1, max_length=150)
+    applicant_name: str = Field(
+        min_length=1,
+        max_length=150
+    )
+
     email: EmailStr
-    phone: str = Field(min_length=1, max_length=30)
+
+    phone: str = Field(
+        min_length=1,
+        max_length=30
+    )
 
     income: float = Field(ge=0)
     age: int = Field(ge=18, le=120)
@@ -154,40 +195,43 @@ def home():
 
 @app.get("/health")
 def health():
-    """Check whether the API can connect to PostgreSQL."""
+    """Check API and PostgreSQL connectivity."""
+
+    connection = None
 
     try:
         connection = get_connection()
 
-        try:
-            with connection.cursor() as cursor:
-                cursor.execute("SELECT 1")
-                cursor.fetchone()
-        finally:
-            connection.close()
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT 1")
+            cursor.fetchone()
 
         return {
             "status": "healthy",
             "database": "connected"
         }
 
+    except HTTPException:
+        raise
+
     except Exception:
         logger.exception("Health check failed.")
-
         raise HTTPException(
             status_code=503,
-            detail="Database connection is unavailable."
+            detail="Database health check failed."
         )
+
+    finally:
+        if connection is not None:
+            connection.close()
 
 
 # ============================================================
-# HELPER: GET APPROVAL AND REJECTION PROBABILITIES
+# HELPER: APPROVAL AND REJECTION PROBABILITIES
 # ============================================================
 
 def get_probabilities(input_data):
     probabilities = model.predict_proba(input_data)[0]
-
-    # Use the model's actual class ordering.
     classes = list(model.classes_)
 
     if 0 not in classes or 1 not in classes:
@@ -221,7 +265,7 @@ def predict(application: LoanApplication):
     cursor = None
 
     try:
-        # Keep the same feature order used during model training.
+        # Feature order must match the model's training order.
         input_data = [[
             application.income,
             application.age,
@@ -232,7 +276,9 @@ def predict(application: LoanApplication):
         prediction = int(model.predict(input_data)[0])
 
         if prediction not in (0, 1):
-            raise ValueError("Unexpected model prediction.")
+            raise ValueError(
+                "Unexpected model prediction."
+            )
 
         approved_probability, rejected_probability = (
             get_probabilities(input_data)
@@ -251,7 +297,6 @@ def predict(application: LoanApplication):
         else:
             risk_level = "HIGH"
 
-        # Save the application to Supabase PostgreSQL.
         connection = get_connection()
         cursor = connection.cursor()
 
@@ -270,8 +315,10 @@ def predict(application: LoanApplication):
                 approved_probability,
                 rejected_probability
             )
-            VALUES (%s, %s, %s, %s, %s, %s,
-                    %s, %s, %s, %s, %s)
+            VALUES (
+                %s, %s, %s, %s, %s, %s,
+                %s, %s, %s, %s, %s
+            )
             """,
             (
                 application.applicant_name,
@@ -299,12 +346,16 @@ def predict(application: LoanApplication):
             "applicant_name": application.applicant_name
         }
 
+    except HTTPException:
+        if connection is not None:
+            connection.rollback()
+        raise
+
     except Exception:
         if connection is not None:
             connection.rollback()
 
         logger.exception("Prediction or database save failed.")
-
         raise HTTPException(
             status_code=500,
             detail="Prediction could not be completed."
@@ -383,9 +434,11 @@ def get_statistics():
             "average_loan_amount": float(row[5])
         }
 
+    except HTTPException:
+        raise
+
     except Exception:
         logger.exception("Statistics request failed.")
-
         raise HTTPException(
             status_code=500,
             detail="Could not retrieve statistics."
@@ -436,9 +489,11 @@ def get_analytics():
             for prediction, total in rows
         ]
 
+    except HTTPException:
+        raise
+
     except Exception:
         logger.exception("Analytics request failed.")
-
         raise HTTPException(
             status_code=500,
             detail="Could not retrieve analytics."
@@ -503,14 +558,20 @@ def get_applications():
                 "result": row[9],
                 "approved_probability": row[10],
                 "rejected_probability": row[11],
-                "created_at": row[12]
+                "created_at": (
+                    row[12].isoformat()
+                    if row[12] is not None
+                    else None
+                )
             }
             for row in rows
         ]
 
+    except HTTPException:
+        raise
+
     except Exception:
         logger.exception("Application history request failed.")
-
         raise HTTPException(
             status_code=500,
             detail="Could not retrieve applications."
@@ -581,7 +642,11 @@ def get_application(application_id: int):
             "result": row[9],
             "approved_probability": row[10],
             "rejected_probability": row[11],
-            "created_at": row[12]
+            "created_at": (
+                row[12].isoformat()
+                if row[12] is not None
+                else None
+            )
         }
 
     except HTTPException:
@@ -589,7 +654,6 @@ def get_application(application_id: int):
 
     except Exception:
         logger.exception("Single application request failed.")
-
         raise HTTPException(
             status_code=500,
             detail="Could not retrieve the application."
