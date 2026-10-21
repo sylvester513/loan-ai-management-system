@@ -1,0 +1,723 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Loan AI | Management System</title>
+
+    <link rel="stylesheet"
+          href="style.css">
+
+</head>
+
+
+<body>
+
+
+<!-- =====================================================
+     SIDEBAR
+===================================================== -->
+
+<aside class="sidebar">
+
+    <div class="logo">
+
+        <div class="logo-icon">
+            L
+        </div>
+
+        <div>
+
+            <h2>Loan AI</h2>
+
+            <span>
+                Management System
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <nav>
+
+        <a href="#" class="active">
+            Dashboard
+        </a>
+
+        <a href="#prediction">
+            New Application
+        </a>
+
+        <a href="#analytics">
+            Analytics
+        </a>
+
+        <a href="#history">
+            Applications
+        </a>
+
+    </nav>
+
+
+    <div class="sidebar-footer">
+
+        <p>AI Loan Intelligence</p>
+
+        <span>
+            FastAPI + PostgreSQL
+        </span>
+
+    </div>
+
+</aside>
+
+
+
+<!-- =====================================================
+     MAIN
+===================================================== -->
+
+<main class="main-content">
+
+
+    <!-- HEADER -->
+
+    <header class="topbar">
+
+        <div>
+
+            <p class="welcome">
+                AI Loan Intelligence
+            </p>
+
+            <h1>
+                Dashboard
+            </h1>
+
+        </div>
+
+
+        <div class="status">
+
+            <span class="status-dot"></span>
+
+            API Connected
+
+        </div>
+
+    </header>
+
+
+
+    <!-- =================================================
+         STATISTICS
+    ================================================= -->
+
+    <section class="statistics-grid">
+
+
+        <div class="stat-card">
+
+            <div class="stat-icon">
+                📊
+            </div>
+
+            <div>
+
+                <p>
+                    Applications
+                </p>
+
+                <h2 id="totalApplications">
+                    0
+                </h2>
+
+            </div>
+
+        </div>
+
+
+
+        <div class="stat-card approved">
+
+            <div class="stat-icon">
+                ✓
+            </div>
+
+            <div>
+
+                <p>
+                    Approved
+                </p>
+
+                <h2 id="approvedLoans">
+                    0
+                </h2>
+
+            </div>
+
+        </div>
+
+
+
+        <div class="stat-card rejected">
+
+            <div class="stat-icon">
+                ✕
+            </div>
+
+            <div>
+
+                <p>
+                    Rejected
+                </p>
+
+                <h2 id="rejectedLoans">
+                    0
+                </h2>
+
+            </div>
+
+        </div>
+
+
+
+        <div class="stat-card rate">
+
+            <div class="stat-icon">
+                %
+            </div>
+
+            <div>
+
+                <p>
+                    Approval Rate
+                </p>
+
+                <h2 id="approvalRate">
+                    0%
+                </h2>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =================================================
+         ADDITIONAL STATISTICS
+    ================================================= -->
+
+    <section class="statistics-grid">
+
+
+        <div class="stat-card">
+
+            <div class="stat-icon">
+                💰
+            </div>
+
+            <div>
+
+                <p>
+                    Average Income
+                </p>
+
+                <h2 id="averageIncome">
+                    0
+                </h2>
+
+            </div>
+
+        </div>
+
+
+
+        <div class="stat-card">
+
+            <div class="stat-icon">
+                ⭐
+            </div>
+
+            <div>
+
+                <p>
+                    Average Credit
+                </p>
+
+                <h2 id="averageCredit">
+                    0
+                </h2>
+
+            </div>
+
+        </div>
+
+
+
+        <div class="stat-card">
+
+            <div class="stat-icon">
+                💵
+            </div>
+
+            <div>
+
+                <p>
+                    Average Loan
+                </p>
+
+                <h2 id="averageLoan">
+                    0
+                </h2>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =================================================
+         NEW APPLICATION
+    ================================================= -->
+
+    <section id="prediction"
+             class="dashboard-section">
+
+
+        <div class="section-header">
+
+            <div>
+
+                <p class="section-label">
+                    NEW APPLICATION
+                </p>
+
+                <h2>
+                    Applicant Assessment
+                </h2>
+
+                <p>
+                    Enter applicant information for
+                    AI-powered loan assessment.
+                </p>
+
+            </div>
+
+        </div>
+
+
+
+        <div class="prediction-layout">
+
+
+            <!-- FORM -->
+
+            <div class="prediction-card">
+
+
+                <form id="loanForm">
+
+
+                    <h3 class="form-title">
+                        Applicant Information
+                    </h3>
+
+
+                    <div class="form-group">
+
+                        <label for="applicant_name">
+                            Full Name
+                        </label>
+
+                        <input
+                            type="text"
+                            id="applicant_name"
+                            placeholder="John Doe"
+                            required
+                        >
+
+                    </div>
+
+
+
+                    <div class="form-group">
+
+                        <label for="email">
+                            Email Address
+                        </label>
+
+                        <input
+                            type="email"
+                            id="email"
+                            placeholder="john@example.com"
+                            required
+                        >
+
+                    </div>
+
+
+
+                    <div class="form-group">
+
+                        <label for="phone">
+                            Phone Number
+                        </label>
+
+                        <input
+                            type="tel"
+                            id="phone"
+                            placeholder="0712345678"
+                            required
+                        >
+
+                    </div>
+
+
+
+                    <h3 class="form-title">
+                        Financial Information
+                    </h3>
+
+
+
+                    <div class="form-row">
+
+
+                        <div class="form-group">
+
+                            <label for="income">
+                                Annual Income
+                            </label>
+
+                            <input
+                                type="number"
+                                id="income"
+                                placeholder="50000"
+                                required
+                            >
+
+                        </div>
+
+
+
+                        <div class="form-group">
+
+                            <label for="age">
+                                Age
+                            </label>
+
+                            <input
+                                type="number"
+                                id="age"
+                                placeholder="30"
+                                min="18"
+                                required
+                            >
+
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="form-row">
+
+
+                        <div class="form-group">
+
+                            <label for="loan_amount">
+                                Loan Amount
+                            </label>
+
+                            <input
+                                type="number"
+                                id="loan_amount"
+                                placeholder="250000"
+                                required
+                            >
+
+                        </div>
+
+
+
+                        <div class="form-group">
+
+                            <label for="credit_score">
+                                Credit Score
+                            </label>
+
+                            <input
+                                type="number"
+                                id="credit_score"
+                                placeholder="650"
+                                min="300"
+                                max="850"
+                                required
+                            >
+
+                        </div>
+
+                    </div>
+
+
+
+                    <button
+                        type="submit"
+                        id="predictButton">
+
+                        Assess Loan Application
+
+                    </button>
+
+
+                </form>
+
+            </div>
+
+
+
+            <!-- RESULT -->
+
+            <div class="result-card"
+                 id="resultCard">
+
+
+                <div class="result-placeholder">
+
+                    <div class="result-icon">
+                        AI
+                    </div>
+
+                    <h3>
+                        Ready for Assessment
+                    </h3>
+
+                    <p>
+                        Enter applicant information
+                        and submit the application to
+                        receive an AI-powered assessment.
+                    </p>
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =================================================
+         ANALYTICS
+    ================================================= -->
+
+    <section id="analytics"
+             class="dashboard-section">
+
+
+        <div class="section-header">
+
+            <div>
+
+                <p class="section-label">
+                    ANALYTICS
+                </p>
+
+                <h2>
+                    Loan Analytics
+                </h2>
+
+                <p>
+                    Real-time analysis of loan applications.
+                </p>
+
+            </div>
+
+        </div>
+
+
+
+        <div class="charts-grid">
+
+
+            <div class="chart-card">
+
+                <h3>
+                    Approval Distribution
+                </h3>
+
+                <p>
+                    Approved versus rejected applications.
+                </p>
+
+                <div class="chart-container">
+
+                    <canvas
+                        id="approvalChart">
+                    </canvas>
+
+                </div>
+
+            </div>
+
+
+
+            <div class="chart-card">
+
+                <h3>
+                    Application Overview
+                </h3>
+
+                <p>
+                    Number of applications by result.
+                </p>
+
+                <div class="chart-container">
+
+                    <canvas
+                        id="predictionChart">
+                    </canvas>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =================================================
+         APPLICATION HISTORY
+    ================================================= -->
+
+    <section id="history"
+             class="dashboard-section">
+
+
+        <div class="section-header">
+
+            <div>
+
+                <p class="section-label">
+                    APPLICATION DATABASE
+                </p>
+
+                <h2>
+                    Recent Applications
+                </h2>
+
+                <p>
+                    Applicant and prediction history.
+                </p>
+
+            </div>
+
+
+            <button
+                class="refresh-button"
+                onclick="refreshDashboard()">
+
+                Refresh
+
+            </button>
+
+        </div>
+
+
+
+        <div class="table-container">
+
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>ID</th>
+
+                        <th>Applicant</th>
+
+                        <th>Contact</th>
+
+                        <th>Income</th>
+
+                        <th>Loan</th>
+
+                        <th>Credit</th>
+
+                        <th>Result</th>
+
+                        <th>Risk</th>
+
+                        <th>Approval</th>
+
+                        <th>Date</th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody id="applicationsTable">
+
+                    <tr>
+
+                        <td colspan="10"
+                            class="loading">
+
+                            Loading applications...
+
+                        </td>
+
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+
+</main>
+
+
+
+<!-- =====================================================
+     CHART.JS
+===================================================== -->
+
+<script
+    src="https://cdn.jsdelivr.net/npm/chart.js">
+</script>
+
+
+<!-- =====================================================
+     JAVASCRIPT
+===================================================== -->
+
+<script src="script.js"></script>
+
+
+</body>
+
+</html>
+
