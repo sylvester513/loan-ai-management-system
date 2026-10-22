@@ -1,4 +1,3 @@
-
 import os
 import logging
 import math
@@ -75,7 +74,7 @@ app.add_middleware(
 
 
 # ============================================================
-# LOAD MODEL
+# LOAD MACHINE LEARNING MODEL
 # ============================================================
 
 try:
@@ -85,7 +84,9 @@ try:
     model = joblib.load(MODEL_PATH)
 
     if not hasattr(model, "predict") or not hasattr(model, "predict_proba"):
-        raise ValueError("Model must support predict() and predict_proba().")
+        raise ValueError(
+            "Model must support predict() and predict_proba()."
+        )
 
     logger.info("ML model loaded successfully.")
 
@@ -98,17 +99,21 @@ except Exception:
 # ADMIN AUTHENTICATION
 # ============================================================
 
-# Configure ADMIN_USERNAME and ADMIN_PASSWORD in Render environment variables.
-# Use a long, unique password. Never place these credentials in frontend code.
+# Set ADMIN_USERNAME and ADMIN_PASSWORD in Render Environment.
+# Never put the actual admin password in frontend JavaScript.
+
 admin_security = HTTPBasic(auto_error=True)
 
 
-def require_admin(credentials: HTTPBasicCredentials = Depends(admin_security)):
+def require_admin(
+    credentials: HTTPBasicCredentials = Depends(admin_security)
+):
     configured_username = os.getenv("ADMIN_USERNAME")
     configured_password = os.getenv("ADMIN_PASSWORD")
 
     if not configured_username or not configured_password:
         logger.error("Admin authentication is not configured.")
+
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="Admin access is not configured."
@@ -118,6 +123,7 @@ def require_admin(credentials: HTTPBasicCredentials = Depends(admin_security)):
         credentials.username.encode("utf-8"),
         configured_username.encode("utf-8")
     )
+
     password_ok = secrets.compare_digest(
         credentials.password.encode("utf-8"),
         configured_password.encode("utf-8")
@@ -139,7 +145,8 @@ def require_admin(credentials: HTTPBasicCredentials = Depends(admin_security)):
 
 def get_connection():
     missing = [
-        key for key, value in {
+        key
+        for key, value in {
             "DB_HOST": DB_HOST,
             "DB_USER": DB_USER,
             "DB_PASSWORD": DB_PASSWORD,
@@ -148,7 +155,11 @@ def get_connection():
     ]
 
     if missing:
-        logger.error("Missing database configuration: %s", ", ".join(missing))
+        logger.error(
+            "Missing database configuration: %s",
+            ", ".join(missing)
+        )
+
         raise HTTPException(
             status_code=500,
             detail="Database configuration is incomplete."
@@ -164,8 +175,10 @@ def get_connection():
             sslmode=DB_SSLMODE,
             connect_timeout=10,
         )
+
     except psycopg2.Error:
         logger.exception("Database connection failed.")
+
         raise HTTPException(
             status_code=503,
             detail="Database connection is unavailable."
@@ -198,7 +211,7 @@ class LoanApplication(BaseModel):
 # ============================================================
 
 def log_database_diagnostics(connection):
-    """Log schema details without exposing applicant personal data."""
+    """Log schema details without exposing applicant contact details."""
 
     try:
         with connection.cursor() as cursor:
@@ -206,7 +219,11 @@ def log_database_diagnostics(connection):
                 SELECT current_database(), current_schema(),
                        current_setting('search_path')
             """)
-            logger.error("Database context: %s", cursor.fetchone())
+
+            logger.error(
+                "Database context: %s",
+                cursor.fetchone()
+            )
 
             cursor.execute("""
                 SELECT column_name,
@@ -217,6 +234,7 @@ def log_database_diagnostics(connection):
                   AND NOT a.attisdropped
                 ORDER BY a.attnum
             """)
+
             logger.error(
                 "Actual public.loan_applications column types: %s",
                 cursor.fetchall()
@@ -228,14 +246,18 @@ def log_database_diagnostics(connection):
                 WHERE event_object_schema = 'public'
                   AND event_object_table = 'loan_applications'
             """)
-            logger.error("Application table triggers: %s", cursor.fetchall())
+
+            logger.error(
+                "Application table triggers: %s",
+                cursor.fetchall()
+            )
 
     except Exception:
         logger.exception("Could not collect database diagnostics.")
 
 
 # ============================================================
-# HEALTH AND HOME
+# HOME AND HEALTH ENDPOINTS
 # ============================================================
 
 @app.get("/")
@@ -250,19 +272,30 @@ def home():
 @app.get("/health")
 def health():
     connection = None
+
     try:
         connection = get_connection()
+
         with connection.cursor() as cursor:
             cursor.execute("SELECT 1")
             cursor.fetchone()
 
-        return {"status": "healthy", "database": "connected"}
+        return {
+            "status": "healthy",
+            "database": "connected"
+        }
 
     except HTTPException:
         raise
+
     except Exception:
         logger.exception("Health check failed.")
-        raise HTTPException(status_code=503, detail="Database health check failed.")
+
+        raise HTTPException(
+            status_code=503,
+            detail="Database health check failed."
+        )
+
     finally:
         if connection is not None:
             connection.close()
@@ -300,14 +333,21 @@ def get_probabilities(input_data):
     if 0 not in classes or 1 not in classes:
         raise ValueError("Model must contain class 0 and class 1.")
 
-    approved = round(float(probabilities[classes.index(1)]) * 100, 2)
-    rejected = round(float(probabilities[classes.index(0)]) * 100, 2)
+    approved = round(
+        float(probabilities[classes.index(1)]) * 100,
+        2
+    )
+
+    rejected = round(
+        float(probabilities[classes.index(0)]) * 100,
+        2
+    )
 
     return approved, rejected
 
 
 # ============================================================
-# CREATE AND SAVE LOAN APPLICATION
+# PUBLIC LOAN APPLICATION AND PREDICTION
 # ============================================================
 
 @app.post("/predict")
@@ -319,12 +359,19 @@ def predict(application: LoanApplication):
         input_data = prepare_model_input(application)
 
         prediction = int(model.predict(input_data)[0])
+
         if prediction not in (0, 1):
             raise ValueError("Unexpected model prediction.")
 
-        approved_probability, rejected_probability = get_probabilities(input_data)
+        approved_probability, rejected_probability = (
+            get_probabilities(input_data)
+        )
 
-        result = "Loan Approved" if prediction == 1 else "Loan Rejected"
+        result = (
+            "Loan Approved"
+            if prediction == 1
+            else "Loan Rejected"
+        )
 
         if approved_probability >= 80:
             risk_level = "LOW"
@@ -333,7 +380,6 @@ def predict(application: LoanApplication):
         else:
             risk_level = "HIGH"
 
-        # Validate calculated values before attempting the database insert.
         numeric_values = {
             "income": application.income,
             "loan_amount": application.loan_amount,
@@ -343,11 +389,17 @@ def predict(application: LoanApplication):
 
         for field_name, value in numeric_values.items():
             if not math.isfinite(value):
-                raise ValueError(f"Invalid numeric value for {field_name}.")
+                raise ValueError(
+                    f"Invalid numeric value for {field_name}."
+                )
 
-        if not (0 <= approved_probability <= 100 and
-                0 <= rejected_probability <= 100):
-            raise ValueError("Model probabilities are outside the 0-100 range.")
+        if not (
+            0 <= approved_probability <= 100
+            and 0 <= rejected_probability <= 100
+        ):
+            raise ValueError(
+                "Model probabilities are outside the 0-100 range."
+            )
 
         connection = get_connection()
         connection.autocommit = False
@@ -393,7 +445,11 @@ def predict(application: LoanApplication):
 
         return {
             "id": saved_row[0],
-            "created_at": saved_row[1].isoformat() if saved_row[1] else None,
+            "created_at": (
+                saved_row[1].isoformat()
+                if saved_row[1]
+                else None
+            ),
             "prediction": prediction,
             "result": result,
             "approved_probability": approved_probability,
@@ -412,7 +468,6 @@ def predict(application: LoanApplication):
         if connection is not None:
             connection.rollback()
 
-        # Log numeric inputs only, never applicant contact details.
         logger.error(
             "Application processing failed. Numeric inputs: "
             "income=%s, age=%s, loan_amount=%s, credit_score=%s",
@@ -428,6 +483,7 @@ def predict(application: LoanApplication):
                 exc.pgcode,
                 getattr(exc, "pgerror", None)
             )
+
             if connection is not None:
                 log_database_diagnostics(connection)
 
@@ -435,22 +491,28 @@ def predict(application: LoanApplication):
 
         raise HTTPException(
             status_code=500,
-            detail="Prediction could not be completed or saved. Please try again."
+            detail=(
+                "Prediction could not be completed or saved. "
+                "Please try again."
+            )
         )
 
     finally:
         if cursor is not None:
             cursor.close()
+
         if connection is not None:
             connection.close()
 
 
 # ============================================================
-# STATISTICS
+# ADMIN-ONLY STATISTICS
 # ============================================================
 
 @app.get("/statistics")
-def get_statistics(_admin: str = Depends(require_admin)):
+def get_statistics(
+    _admin: str = Depends(require_admin)
+):
     connection = None
     cursor = None
 
@@ -476,7 +538,11 @@ def get_statistics(_admin: str = Depends(require_admin)):
             "total_applications": total,
             "approved": approved,
             "rejected": rejected,
-            "approval_rate": round(approved / total * 100, 2) if total else 0,
+            "approval_rate": (
+                round(approved / total * 100, 2)
+                if total
+                else 0
+            ),
             "average_income": float(row[3]),
             "average_credit_score": float(row[4]),
             "average_loan_amount": float(row[5]),
@@ -484,22 +550,31 @@ def get_statistics(_admin: str = Depends(require_admin)):
 
     except HTTPException:
         raise
+
     except Exception:
         logger.exception("Statistics request failed.")
-        raise HTTPException(status_code=500, detail="Could not retrieve statistics.")
+
+        raise HTTPException(
+            status_code=500,
+            detail="Could not retrieve statistics."
+        )
+
     finally:
         if cursor is not None:
             cursor.close()
+
         if connection is not None:
             connection.close()
 
 
 # ============================================================
-# ANALYTICS
+# ADMIN-ONLY ANALYTICS
 # ============================================================
 
 @app.get("/analytics")
-def get_analytics(_admin: str = Depends(require_admin)):
+def get_analytics(
+    _admin: str = Depends(require_admin)
+):
     connection = None
     cursor = None
 
@@ -516,7 +591,11 @@ def get_analytics(_admin: str = Depends(require_admin)):
 
         return [
             {
-                "result": "Loan Approved" if prediction == 1 else "Loan Rejected",
+                "result": (
+                    "Loan Approved"
+                    if prediction == 1
+                    else "Loan Rejected"
+                ),
                 "total": total,
             }
             for prediction, total in cursor.fetchall()
@@ -524,18 +603,25 @@ def get_analytics(_admin: str = Depends(require_admin)):
 
     except HTTPException:
         raise
+
     except Exception:
         logger.exception("Analytics request failed.")
-        raise HTTPException(status_code=500, detail="Could not retrieve analytics.")
+
+        raise HTTPException(
+            status_code=500,
+            detail="Could not retrieve analytics."
+        )
+
     finally:
         if cursor is not None:
             cursor.close()
+
         if connection is not None:
             connection.close()
 
 
 # ============================================================
-# APPLICATION HISTORY
+# ADMIN-ONLY APPLICATION HISTORY
 # ============================================================
 
 def application_to_dict(row):
@@ -546,13 +632,29 @@ def application_to_dict(row):
         "phone": row[3],
         "income": float(row[4]) if row[4] is not None else None,
         "age": row[5],
-        "loan_amount": float(row[6]) if row[6] is not None else None,
+        "loan_amount": (
+            float(row[6])
+            if row[6] is not None
+            else None
+        ),
         "credit_score": row[7],
         "prediction": row[8],
         "result": row[9],
-        "approved_probability": float(row[10]) if row[10] is not None else None,
-        "rejected_probability": float(row[11]) if row[11] is not None else None,
-        "created_at": row[12].isoformat() if row[12] else None,
+        "approved_probability": (
+            float(row[10])
+            if row[10] is not None
+            else None
+        ),
+        "rejected_probability": (
+            float(row[11])
+            if row[11] is not None
+            else None
+        ),
+        "created_at": (
+            row[12].isoformat()
+            if row[12]
+            else None
+        ),
     }
 
 
@@ -564,40 +666,58 @@ APPLICATION_COLUMNS = """
 
 
 @app.get("/applications")
-def get_applications(_admin: str = Depends(require_admin)):
+def get_applications(
+    _admin: str = Depends(require_admin)
+):
     connection = None
     cursor = None
 
     try:
         connection = get_connection()
         cursor = connection.cursor()
+
         cursor.execute(f"""
             SELECT {APPLICATION_COLUMNS}
             FROM public.loan_applications
             ORDER BY id DESC
         """)
-        return [application_to_dict(row) for row in cursor.fetchall()]
+
+        return [
+            application_to_dict(row)
+            for row in cursor.fetchall()
+        ]
 
     except HTTPException:
         raise
+
     except Exception:
         logger.exception("Application history request failed.")
-        raise HTTPException(status_code=500, detail="Could not retrieve applications.")
+
+        raise HTTPException(
+            status_code=500,
+            detail="Could not retrieve applications."
+        )
+
     finally:
         if cursor is not None:
             cursor.close()
+
         if connection is not None:
             connection.close()
 
 
 @app.get("/applications/{application_id}")
-def get_application(application_id: int, _admin: str = Depends(require_admin)):
+def get_application(
+    application_id: int,
+    _admin: str = Depends(require_admin)
+):
     connection = None
     cursor = None
 
     try:
         connection = get_connection()
         cursor = connection.cursor()
+
         cursor.execute(f"""
             SELECT {APPLICATION_COLUMNS}
             FROM public.loan_applications
@@ -605,18 +725,29 @@ def get_application(application_id: int, _admin: str = Depends(require_admin)):
         """, (application_id,))
 
         row = cursor.fetchone()
+
         if row is None:
-            raise HTTPException(status_code=404, detail="Application not found.")
+            raise HTTPException(
+                status_code=404,
+                detail="Application not found."
+            )
 
         return application_to_dict(row)
 
     except HTTPException:
         raise
+
     except Exception:
         logger.exception("Single application request failed.")
-        raise HTTPException(status_code=500, detail="Could not retrieve the application.")
+
+        raise HTTPException(
+            status_code=500,
+            detail="Could not retrieve the application."
+        )
+
     finally:
         if cursor is not None:
             cursor.close()
+
         if connection is not None:
             connection.close()

@@ -1,14 +1,12 @@
+"use strict";
+
 // ============================================================
-// LOAN AI MANAGEMENT SYSTEM
-// Secure Frontend JavaScript
+// CONFIGURATION
 // ============================================================
 
-// API CONFIGURATION
 const API_URL = "https://loan-ai-management-system.onrender.com";
 
-// Admin credentials stay in memory only.
 let adminAuthorization = null;
-
 let approvalChart = null;
 let predictionChart = null;
 
@@ -28,18 +26,18 @@ function setAdminView(isAdmin) {
         element.hidden = !isAdmin;
     });
 
+    const status = document.getElementById("adminAuthStatus");
     const loginForm = document.getElementById("adminLoginForm");
     const logoutButton = document.getElementById("adminLogoutButton");
-    const status = document.getElementById("adminAuthStatus");
-
-    if (loginForm) loginForm.hidden = isAdmin;
-    if (logoutButton) logoutButton.hidden = !isAdmin;
 
     if (status) {
         status.textContent = isAdmin
             ? "Admin authenticated"
             : "Admin dashboard locked";
     }
+
+    if (loginForm) loginForm.hidden = isAdmin;
+    if (logoutButton) logoutButton.hidden = !isAdmin;
 }
 
 function clearAdminLogin(message = "Admin dashboard locked") {
@@ -48,7 +46,69 @@ function clearAdminLogin(message = "Admin dashboard locked") {
 
     const status = document.getElementById("adminAuthStatus");
     if (status) status.textContent = message;
+
+    // Clear private information from the visible dashboard.
+    [
+        "totalApplications",
+        "approvedLoans",
+        "rejectedLoans",
+        "approvalRate",
+        "averageIncome",
+        "averageCredit",
+        "averageLoan"
+    ].forEach(id => {
+        const element = document.getElementById(id);
+        if (element) element.textContent = "—";
+    });
+
+    const table = document.getElementById("applicationsTable");
+
+    if (table) {
+        table.innerHTML = `
+            <tr>
+                <td colspan="10" class="loading">
+                    Admin login required.
+                </td>
+            </tr>
+        `;
+    }
+
+    if (approvalChart) {
+        approvalChart.destroy();
+        approvalChart = null;
+    }
+
+    if (predictionChart) {
+        predictionChart.destroy();
+        predictionChart = null;
+    }
 }
+
+async function adminFetch(endpoint) {
+    if (!adminAuthorization) {
+        throw new Error("Please log in as administrator.");
+    }
+
+    const response = await fetch(`${API_URL}${endpoint}`, {
+        headers: getAdminHeaders()
+    });
+
+    if (response.status === 401) {
+        clearAdminLogin("Admin authentication failed. Please log in again.");
+        throw new Error("Your admin credentials are invalid or expired.");
+    }
+
+    if (!response.ok) {
+        throw new Error(`Server returned HTTP ${response.status}.`);
+    }
+
+    return response;
+}
+
+
+// ============================================================
+// LOGIN AND LOGOUT EVENTS
+// ============================================================
 
 document.addEventListener("DOMContentLoaded", () => {
     setAdminView(false);
@@ -65,40 +125,46 @@ document.addEventListener("DOMContentLoaded", () => {
             const password =
                 document.getElementById("adminPassword").value;
 
-            const loginButton =
+            const button =
                 document.getElementById("adminLoginButton");
 
             const status =
                 document.getElementById("adminAuthStatus");
 
+            if (!username || !password) {
+                alert("Enter your admin username and password.");
+                return;
+            }
+
+            // HTTP Basic credentials are encoded, not encrypted.
+            // HTTPS protects them while they travel to the backend.
+            // They are held in memory and not saved in localStorage.
             adminAuthorization =
                 "Basic " +
                 btoa(unescape(encodeURIComponent(username + ":" + password)));
 
-            if (loginButton) loginButton.disabled = true;
-
-            if (status) {
-                status.textContent = "Checking admin credentials...";
-            }
+            if (button) button.disabled = true;
+            if (status) status.textContent = "Checking credentials...";
 
             try {
+                // Successful access to this protected endpoint verifies login.
                 const response = await fetch(`${API_URL}/statistics`, {
                     headers: getAdminHeaders()
                 });
 
-                if (!response.ok) {
-                    if (response.status === 401) {
-                        throw new Error("Invalid admin username or password.");
-                    }
+                if (response.status === 401) {
+                    throw new Error("Incorrect admin username or password.");
+                }
 
-                    if (response.status === 503) {
-                        throw new Error(
-                            "Admin access is not configured in Render."
-                        );
-                    }
-
+                if (response.status === 503) {
                     throw new Error(
-                        `Login failed. Server returned ${response.status}.`
+                        "Admin access is not configured in Render."
+                    );
+                }
+
+                if (!response.ok) {
+                    throw new Error(
+                        `Login failed. Server returned HTTP ${response.status}.`
                     );
                 }
 
@@ -112,7 +178,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 alert(error.message);
 
             } finally {
-                if (loginButton) loginButton.disabled = false;
+                if (button) button.disabled = false;
             }
         });
     }
@@ -123,68 +189,20 @@ document.addEventListener("DOMContentLoaded", () => {
     if (logoutButton) {
         logoutButton.addEventListener("click", () => {
             clearAdminLogin("You have logged out.");
-
-            [
-                "totalApplications",
-                "approvedLoans",
-                "rejectedLoans",
-                "approvalRate",
-                "averageIncome",
-                "averageCredit",
-                "averageLoan"
-            ].forEach(id => {
-                const element = document.getElementById(id);
-                if (element) element.textContent = "—";
-            });
-
-            const table =
-                document.getElementById("applicationsTable");
-
-            if (table) {
-                table.innerHTML = `
-                    <tr>
-                        <td colspan="10" class="loading">
-                            Admin login required.
-                        </td>
-                    </tr>
-                `;
-            }
-
-            if (approvalChart) {
-                approvalChart.destroy();
-                approvalChart = null;
-            }
-
-            if (predictionChart) {
-                predictionChart.destroy();
-                predictionChart = null;
-            }
         });
     }
 });
 
 
 // ============================================================
-// LOAD DASHBOARD STATISTICS
+// LOAD ADMIN STATISTICS
 // ============================================================
 
 async function loadStatistics() {
     if (!adminAuthorization) return;
 
     try {
-        const response = await fetch(`${API_URL}/statistics`, {
-            headers: getAdminHeaders()
-        });
-
-        if (response.status === 401) {
-            clearAdminLogin("Your admin session is no longer valid.");
-            throw new Error("Admin authentication failed.");
-        }
-
-        if (!response.ok) {
-            throw new Error(`Server returned ${response.status}`);
-        }
-
+        const response = await adminFetch("/statistics");
         const data = await response.json();
 
         setText("totalApplications", data.total_applications);
@@ -193,7 +211,7 @@ async function loadStatistics() {
         setText("approvalRate", `${data.approval_rate}%`);
 
         setText("averageIncome", formatNumber(data.average_income));
-        setText("averageCredit", data.average_credit_score);
+        setText("averageCredit", formatNumber(data.average_credit_score));
         setText("averageLoan", formatNumber(data.average_loan_amount));
 
     } catch (error) {
@@ -203,33 +221,22 @@ async function loadStatistics() {
 
 
 // ============================================================
-// LOAD APPLICATION HISTORY
+// LOAD ALL APPLICATIONS FOR ADMIN
 // ============================================================
 
 async function loadApplications() {
     if (!adminAuthorization) return;
 
     const table = document.getElementById("applicationsTable");
+
     if (!table) return;
 
     try {
-        const response = await fetch(`${API_URL}/applications`, {
-            headers: getAdminHeaders()
-        });
-
-        if (response.status === 401) {
-            clearAdminLogin("Your admin session is no longer valid.");
-            throw new Error("Admin authentication failed.");
-        }
-
-        if (!response.ok) {
-            throw new Error(`Server returned ${response.status}`);
-        }
-
+        const response = await adminFetch("/applications");
         const applications = await response.json();
 
         if (!Array.isArray(applications)) {
-            throw new Error("Invalid application data received.");
+            throw new Error("The server returned invalid application data.");
         }
 
         table.innerHTML = "";
@@ -248,8 +255,10 @@ async function loadApplications() {
         applications.forEach(application => {
             const row = document.createElement("tr");
 
+            const approvedProbability =
+                Number(application.approved_probability) || 0;
+
             const prediction = Number(application.prediction);
-            const probability = Number(application.approved_probability);
 
             const badgeClass =
                 prediction === 1 ? "approved-badge" : "rejected-badge";
@@ -257,10 +266,10 @@ async function loadApplications() {
             let riskLevel = "HIGH";
             let riskClass = "risk-high";
 
-            if (probability >= 80) {
+            if (approvedProbability >= 80) {
                 riskLevel = "LOW";
                 riskClass = "risk-low";
-            } else if (probability >= 50) {
+            } else if (approvedProbability >= 50) {
                 riskLevel = "MEDIUM";
                 riskClass = "risk-medium";
             }
@@ -269,7 +278,9 @@ async function loadApplications() {
                 <td>#${escapeHTML(application.id)}</td>
 
                 <td>
-                    <strong>${escapeHTML(application.applicant_name)}</strong>
+                    <strong>
+                        ${escapeHTML(application.applicant_name)}
+                    </strong>
                 </td>
 
                 <td>
@@ -295,7 +306,7 @@ async function loadApplications() {
                     </span>
                 </td>
 
-                <td>${formatNumber(application.approved_probability)}%</td>
+                <td>${formatNumber(approvedProbability)}%</td>
 
                 <td>${formatDate(application.created_at)}</td>
             `;
@@ -304,13 +315,13 @@ async function loadApplications() {
         });
 
     } catch (error) {
-        console.error("Applications error:", error);
+        console.error("Application history error:", error);
 
-        if (table && adminAuthorization) {
+        if (adminAuthorization && table) {
             table.innerHTML = `
                 <tr>
                     <td colspan="10" class="loading">
-                        Unable to load applications. Check the backend logs.
+                        Could not load applications. Please refresh.
                     </td>
                 </tr>
             `;
@@ -320,35 +331,24 @@ async function loadApplications() {
 
 
 // ============================================================
-// LOAD ANALYTICS CHARTS
+// LOAD ADMIN ANALYTICS
 // ============================================================
 
 async function loadAnalytics() {
     if (!adminAuthorization) return;
 
     try {
-        const response = await fetch(`${API_URL}/analytics`, {
-            headers: getAdminHeaders()
-        });
-
-        if (response.status === 401) {
-            clearAdminLogin("Your admin session is no longer valid.");
-            throw new Error("Admin authentication failed.");
-        }
-
-        if (!response.ok) {
-            throw new Error(`Server returned ${response.status}`);
-        }
-
+        const response = await adminFetch("/analytics");
         const data = await response.json();
 
         if (!Array.isArray(data)) {
-            throw new Error("Invalid analytics data received.");
+            throw new Error("The server returned invalid analytics data.");
         }
 
         const labels = data.map(item => item.result);
         const totals = data.map(item => Number(item.total));
 
+        // Recreate charts to prevent duplicates after refreshing.
         if (approvalChart) {
             approvalChart.destroy();
             approvalChart = null;
@@ -365,6 +365,7 @@ async function loadAnalytics() {
         if (approvalCanvas && typeof Chart !== "undefined") {
             approvalChart = new Chart(approvalCanvas, {
                 type: "doughnut",
+
                 data: {
                     labels,
                     datasets: [{
@@ -372,9 +373,11 @@ async function loadAnalytics() {
                         data: totals
                     }]
                 },
+
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+
                     plugins: {
                         legend: {
                             position: "bottom"
@@ -390,6 +393,7 @@ async function loadAnalytics() {
         if (predictionCanvas && typeof Chart !== "undefined") {
             predictionChart = new Chart(predictionCanvas, {
                 type: "bar",
+
                 data: {
                     labels,
                     datasets: [{
@@ -397,9 +401,11 @@ async function loadAnalytics() {
                         data: totals
                     }]
                 },
+
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+
                     scales: {
                         y: {
                             beginAtZero: true,
@@ -419,7 +425,24 @@ async function loadAnalytics() {
 
 
 // ============================================================
-// LOAN APPLICATION AND AI PREDICTION
+// REFRESH ADMIN DASHBOARD
+// ============================================================
+
+async function refreshDashboard() {
+    if (!adminAuthorization) {
+        return;
+    }
+
+    await Promise.all([
+        loadStatistics(),
+        loadApplications(),
+        loadAnalytics()
+    ]);
+}
+
+
+// ============================================================
+// PUBLIC LOAN APPLICATION AND AI PREDICTION
 // ============================================================
 
 const loanForm = document.getElementById("loanForm");
@@ -452,19 +475,27 @@ if (loanForm) {
         const creditScore =
             Number(document.getElementById("credit_score").value);
 
-        // Validate the form.
+
+        // ----------------------------------------------------
+        // VALIDATE INPUTS
+        // ----------------------------------------------------
+
         if (!applicantName || !email || !phone) {
-            alert("Please enter the applicant's name, email, and phone.");
+            alert("Please complete the applicant information.");
             return;
         }
 
-        if (!Number.isFinite(income) || income <= 0) {
-            alert("Income must be greater than zero.");
+        if (!Number.isFinite(income) || income < 0) {
+            alert("Enter a valid income.");
             return;
         }
 
-        if (!Number.isFinite(age) || age < 18) {
-            alert("Applicant must be at least 18 years old.");
+        if (
+            !Number.isInteger(age) ||
+            age < 18 ||
+            age > 120
+        ) {
+            alert("Age must be between 18 and 120.");
             return;
         }
 
@@ -474,13 +505,18 @@ if (loanForm) {
         }
 
         if (
-            !Number.isFinite(creditScore) ||
-            creditScore < 300 ||
-            creditScore > 850
+            !Number.isInteger(creditScore) ||
+            creditScore < 0 ||
+            creditScore > 1000
         ) {
-            alert("Credit score must be between 300 and 850.");
+            alert("Enter a valid credit score.");
             return;
         }
+
+
+        // ----------------------------------------------------
+        // SHOW LOADING STATE
+        // ----------------------------------------------------
 
         button.disabled = true;
         button.textContent = "AI Assessing...";
@@ -488,25 +524,35 @@ if (loanForm) {
         resultCard.innerHTML = `
             <div class="result-placeholder">
                 <div class="result-icon">AI</div>
+
                 <h3>Assessing Application</h3>
+
                 <p>
-                    The AI model is analyzing the applicant's financial profile.
+                    The AI model is analyzing the applicant's
+                    financial information.
                 </p>
             </div>
         `;
 
+
+        // ----------------------------------------------------
+        // SEND PREDICTION REQUEST
+        // ----------------------------------------------------
+
         try {
             const response = await fetch(`${API_URL}/predict`, {
                 method: "POST",
+
                 headers: {
                     "Content-Type": "application/json"
                 },
+
                 body: JSON.stringify({
                     applicant_name: applicantName,
-                    email,
-                    phone,
-                    income,
-                    age,
+                    email: email,
+                    phone: phone,
+                    income: income,
+                    age: age,
                     loan_amount: loanAmount,
                     credit_score: creditScore
                 })
@@ -515,21 +561,26 @@ if (loanForm) {
             const data = await response.json().catch(() => ({}));
 
             if (!response.ok) {
-                throw new Error(
+                const message =
                     data.detail ||
                     data.error ||
-                    `Server returned ${response.status}`
-                );
-            }
+                    `Server returned HTTP ${response.status}.`;
 
-            if (data.error) {
-                throw new Error(data.error);
+                throw new Error(message);
             }
 
             const prediction = Number(data.prediction);
 
+            const approvedProbability =
+                Number(data.approved_probability) || 0;
+
+            const rejectedProbability =
+                Number(data.rejected_probability) || 0;
+
             const resultClass =
-                prediction === 1 ? "success-message" : "failure-message";
+                prediction === 1
+                    ? "success-message"
+                    : "failure-message";
 
             let riskClass = "risk-high";
 
@@ -539,64 +590,78 @@ if (loanForm) {
                 riskClass = "risk-medium";
             }
 
-            const approvedProbability =
-                Number(data.approved_probability) || 0;
 
-            const rejectedProbability =
-                Number(data.rejected_probability) || 0;
+            // ------------------------------------------------
+            // DISPLAY PREDICTION
+            // ------------------------------------------------
 
             resultCard.innerHTML = `
                 <div class="prediction-result">
 
                     <div class="result-icon">AI</div>
 
-                    <p class="section-label">AI ASSESSMENT</p>
+                    <p class="section-label">
+                        AI ASSESSMENT
+                    </p>
 
                     <h2 class="${resultClass}">
                         ${escapeHTML(data.result)}
                     </h2>
 
                     <div class="applicant-summary">
-                        <h3>${escapeHTML(data.applicant_name || applicantName)}</h3>
-                        <p>Application successfully assessed and stored.</p>
+                        <h3>
+                            ${escapeHTML(data.applicant_name || applicantName)}
+                        </h3>
+
+                        <p>
+                            Your application has been assessed and saved.
+                        </p>
                     </div>
 
                     <div class="risk-display">
                         <span>Risk Level</span>
+
                         <strong class="${riskClass}">
                             ${escapeHTML(data.risk_level || "N/A")}
                         </strong>
                     </div>
 
                     <div class="probability">
+
                         <div class="probability-label">
                             <span>Approval Probability</span>
+
                             <strong>${approvedProbability}%</strong>
                         </div>
 
                         <div class="progress">
                             <div
                                 class="progress-bar"
-                                style="width:${Math.max(0, Math.min(100, approvedProbability))}%">
+                                style="width:${clampPercentage(approvedProbability)}%">
                             </div>
                         </div>
+
                     </div>
 
                     <div class="probability">
+
                         <div class="probability-label">
                             <span>Rejection Probability</span>
+
                             <strong>${rejectedProbability}%</strong>
                         </div>
 
                         <div class="progress">
                             <div
                                 class="progress-bar"
-                                style="width:${Math.max(0, Math.min(100, rejectedProbability))}%">
+                                style="width:${clampPercentage(rejectedProbability)}%">
                             </div>
                         </div>
+
                     </div>
 
                     <div class="assessment-details">
+
                         <div>
                             <span>Income</span>
                             <strong>${formatNumber(income)}</strong>
@@ -616,20 +681,28 @@ if (loanForm) {
                             <span>Age</span>
                             <strong>${age}</strong>
                         </div>
+
                     </div>
 
                     <p class="storage-message">
-                        ✓ Application stored in PostgreSQL
+                        ✓ Application saved in PostgreSQL
+                    </p>
+
+                    <p>
+                        This is an AI model prediction, not a guarantee
+                        of a lender's final decision.
                     </p>
 
                 </div>
             `;
 
-            // Refresh private dashboard only if an admin is logged in.
+
+            // Refresh the private dashboard only for an authenticated admin.
             if (adminAuthorization) {
                 await refreshDashboard();
             }
 
+            // Clear the form after a successful submission.
             loanForm.reset();
 
         } catch (error) {
@@ -637,6 +710,7 @@ if (loanForm) {
 
             resultCard.innerHTML = `
                 <div class="result-placeholder">
+
                     <div class="result-icon">!</div>
 
                     <h3 class="failure-message">
@@ -647,8 +721,9 @@ if (loanForm) {
 
                     <p>
                         Please try again. If the issue continues,
-                        check the backend service.
+                        check the Render service logs.
                     </p>
+
                 </div>
             `;
 
@@ -661,11 +736,94 @@ if (loanForm) {
 
 
 // ============================================================
-// REFRESH ADMIN DASHBOARD
+// HELPER: UPDATE TEXT SAFELY
 // ============================================================
 
-async function refreshDashboard() {
-    if (!adminAuthorization) return;
+function setText(id, value) {
+    const element = document.getElementById(id);
 
-    await Promise.all([
-        load
+    if (element) {
+        element.textContent =
+            value === null || value === undefined
+                ? "—"
+                : value;
+    }
+}
+
+
+// ============================================================
+// HELPER: FORMAT NUMBERS
+// ============================================================
+
+function formatNumber(number) {
+    const value = Number(number);
+
+    if (!Number.isFinite(value)) {
+        return "0";
+    }
+
+    return value.toLocaleString("en-KE", {
+        maximumFractionDigits: 2
+    });
+}
+
+
+// ============================================================
+// HELPER: FORMAT DATES
+// ============================================================
+
+function formatDate(dateString) {
+    if (!dateString) {
+        return "-";
+    }
+
+    const date = new Date(dateString);
+
+    if (Number.isNaN(date.getTime())) {
+        return "-";
+    }
+
+    return date.toLocaleString("en-KE", {
+        dateStyle: "medium",
+        timeStyle: "short"
+    });
+}
+
+
+// ============================================================
+// HELPER: ESCAPE HTML
+// ============================================================
+
+function escapeHTML(value) {
+    if (value === null || value === undefined) {
+        return "";
+    }
+
+    return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+}
+
+
+// ============================================================
+// HELPER: KEEP PROGRESS BAR BETWEEN 0 AND 100
+// ============================================================
+
+function clampPercentage(value) {
+    const number = Number(value);
+
+    if (!Number.isFinite(number)) {
+        return 0;
+    }
+
+    return Math.max(0, Math.min(100, number));
+}
+
+
+// ============================================================
+// END OF SCRIPT
+// Private dashboard data is not loaded automatically.
+// ============================================================
