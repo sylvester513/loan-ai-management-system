@@ -169,6 +169,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
 
                 setAdminView(true);
+                document.getElementById("analytics")?.scrollIntoView({
+               behavior: "smooth",
+             block: "start"
+             });
                 loginForm.reset();
 
                 await refreshDashboard();
