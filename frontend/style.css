@@ -202,3 +202,47 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 @media(prefers-reduced-motion:reduce){
     *,*::before,*::after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important;animation-iteration-count:1!important}
 }
+
+
+/* FINAL RESPONSIVE HEADER REFINEMENTS */
+.topbar{align-items:flex-start;gap:18px}
+.topbar-heading{flex:1 1 auto;min-width:0}
+.topbar-actions{flex:0 1 420px;min-width:300px;gap:10px}
+.status{margin:0}
+.admin-login-panel{max-width:420px}
+.field-help{margin-top:-2px;color:var(--muted);font-size:10px;line-height:1.4}
+.form-group input:invalid:not(:placeholder-shown){border-color:#e29aa5}
+.form-group input:valid:not(:placeholder-shown){border-color:#9bd8bf}
+
+/* Avoid a large empty header gap on phones. Keep the heading and API badge together,
+   and put the administrator controls neatly at the upper-right area below them. */
+@media(max-width:900px){
+  .topbar{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;column-gap:12px;row-gap:12px}
+  .topbar-heading{grid-column:1/-1;grid-row:1;min-width:0;padding-top:0}
+  .topbar-actions{grid-column:1/-1;grid-row:2;display:grid;grid-template-columns:auto minmax(0,1fr);align-items:start;gap:10px;width:100%;min-width:0}
+  .status{grid-column:1;grid-row:1;justify-self:start}
+  .admin-login-panel{grid-column:2;grid-row:1/span 2;justify-self:end;width:min(100%,390px);padding:11px}
+  .admin-panel-heading{margin-bottom:8px}
+  #adminLoginForm{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:6px}
+  #adminLoginButton{grid-column:1/-1;width:100%}
+}
+@media(max-width:650px){
+  .main-content{padding:16px 13px 18px}
+  .topbar{display:flex;flex-direction:column;align-items:stretch;gap:12px;margin-bottom:22px}
+  .topbar-heading{padding:0}
+  .topbar h1{font-size:25px;letter-spacing:-.7px}
+  .topbar-description{margin-top:6px;max-width:100%;font-size:11px;line-height:1.5}
+  .topbar-actions{display:flex;flex-direction:column;align-items:stretch;gap:9px;width:100%;min-width:0}
+  .status{align-self:flex-start;order:0}
+  .admin-login-panel{order:1;width:100%;max-width:none;padding:12px}
+  .admin-panel-heading{margin-bottom:9px}
+  #adminLoginForm{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:7px}
+  #adminLoginButton{grid-column:1/-1;width:100%}
+  #adminLoginForm input{height:39px;font-size:12px}
+}
+@media(max-width:380px){
+  .topbar h1{font-size:23px}
+  .admin-login-panel{padding:10px}
+  #adminLoginForm{grid-template-columns:minmax(0,1fr)}
+  #adminLoginButton{grid-column:1}
+}

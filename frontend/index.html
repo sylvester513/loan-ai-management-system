@@ -70,7 +70,7 @@
                         <h3 class="form-title">Applicant Information</h3>
                         <div class="form-group"><label for="applicant_name">Full Name</label><input type="text" id="applicant_name" name="applicant_name" placeholder="John Doe" maxlength="150" autocomplete="name" required></div>
                         <div class="form-group"><label for="email">Email Address</label><input type="email" id="email" name="email" placeholder="john@example.com" autocomplete="email" required></div>
-                        <div class="form-group"><label for="phone">Phone Number</label><input type="tel" id="phone" name="phone" placeholder="0712345678" autocomplete="tel" required></div>
+                        <div class="form-group"><label for="phone">Phone Number</label><input type="tel" id="phone" name="phone" placeholder="0712345678 or +254712345678" autocomplete="tel" inputmode="tel" minlength="10" maxlength="16" pattern="(?:\\+254|0)(?:7|1)[0-9]{8}" title="Enter a valid Kenyan mobile number, e.g. 0712345678 or +254712345678." aria-describedby="phoneHelp" required><small class="field-help" id="phoneHelp">Use a valid Kenyan mobile number: 0712345678 or +254712345678.</small></div>
                         <div class="form-divider"></div>
                         <h3 class="form-title">Financial Information</h3>
                         <div class="form-row">
