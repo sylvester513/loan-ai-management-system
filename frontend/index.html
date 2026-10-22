@@ -13,6 +13,13 @@
 
     <link rel="stylesheet"
           href="style.css">
+    <style>
+        [hidden] { display: none !important; }
+        .admin-login-panel label { display: block; margin-top: 8px; }
+        .admin-login-panel input { width: 100%; box-sizing: border-box; margin: 4px 0 8px; }
+        .admin-login-panel button { width: 100%; margin-top: 6px; }
+        #adminAuthStatus { overflow-wrap: anywhere; }
+    </style>
 
 </head>
 
@@ -55,11 +62,11 @@
             New Application
         </a>
 
-        <a href="#analytics">
+        <a href="#analytics" class="admin-nav-link" data-admin-only hidden>
             Analytics
         </a>
 
-        <a href="#history">
+        <a href="#history" class="admin-nav-link" data-admin-only hidden>
             Applications
         </a>
 
@@ -70,9 +77,21 @@
 
         <p>AI Loan Intelligence</p>
 
-        <span>
-            FastAPI + PostgreSQL
-        </span>
+        <span>FastAPI + PostgreSQL</span>
+
+        <div class="admin-login-panel" style="margin-top: 18px;">
+            <p id="adminAuthStatus" aria-live="polite">Admin dashboard locked</p>
+            <form id="adminLoginForm">
+                <label for="adminUsername">Admin username</label>
+                <input id="adminUsername" type="text" autocomplete="username"
+                       placeholder="Admin username" required>
+                <label for="adminPassword">Admin password</label>
+                <input id="adminPassword" type="password" autocomplete="current-password"
+                       placeholder="Admin password" required>
+                <button type="submit" id="adminLoginButton">Admin Login</button>
+            </form>
+            <button type="button" id="adminLogoutButton" hidden>Admin Logout</button>
+        </div>
 
     </div>
 
@@ -98,8 +117,9 @@
             </p>
 
             <h1>
-                Dashboard
+                Loan Application
             </h1>
+            <p>Submit your application below. Administrative statistics and applicant records require admin login.</p>
 
         </div>
 
@@ -120,7 +140,7 @@
          STATISTICS
     ================================================= -->
 
-    <section class="statistics-grid">
+    <section class="statistics-grid admin-only" data-admin-only hidden>
 
 
         <div class="stat-card">
@@ -217,7 +237,7 @@
          ADDITIONAL STATISTICS
     ================================================= -->
 
-    <section class="statistics-grid">
+    <section class="statistics-grid admin-only" data-admin-only hidden>
 
 
         <div class="stat-card">
