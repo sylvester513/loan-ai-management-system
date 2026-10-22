@@ -2,13 +2,15 @@
 import os
 import logging
 import math
+import secrets
 from pathlib import Path
 
 import joblib
 import psycopg2
 
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends, status
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, EmailStr, Field, field_validator
 
@@ -47,7 +49,7 @@ if not MODEL_PATH.is_absolute():
 app = FastAPI(
     title="Loan AI Management System",
     description="AI-powered Loan Management and Prediction API",
-    version="2.1"
+    version="2.2"
 )
 
 CORS_ORIGINS = [
@@ -90,6 +92,45 @@ try:
 except Exception:
     logger.exception("Could not load model.")
     raise
+
+
+# ============================================================
+# ADMIN AUTHENTICATION
+# ============================================================
+
+# Configure ADMIN_USERNAME and ADMIN_PASSWORD in Render environment variables.
+# Use a long, unique password. Never place these credentials in frontend code.
+admin_security = HTTPBasic(auto_error=True)
+
+
+def require_admin(credentials: HTTPBasicCredentials = Depends(admin_security)):
+    configured_username = os.getenv("ADMIN_USERNAME")
+    configured_password = os.getenv("ADMIN_PASSWORD")
+
+    if not configured_username or not configured_password:
+        logger.error("Admin authentication is not configured.")
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Admin access is not configured."
+        )
+
+    username_ok = secrets.compare_digest(
+        credentials.username.encode("utf-8"),
+        configured_username.encode("utf-8")
+    )
+    password_ok = secrets.compare_digest(
+        credentials.password.encode("utf-8"),
+        configured_password.encode("utf-8")
+    )
+
+    if not (username_ok and password_ok):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid admin credentials.",
+            headers={"WWW-Authenticate": "Basic"}
+        )
+
+    return credentials.username
 
 
 # ============================================================
@@ -201,7 +242,7 @@ def log_database_diagnostics(connection):
 def home():
     return {
         "message": "Loan AI Management System is running",
-        "version": "2.1",
+        "version": "2.2",
         "status": "online"
     }
 
@@ -409,7 +450,7 @@ def predict(application: LoanApplication):
 # ============================================================
 
 @app.get("/statistics")
-def get_statistics():
+def get_statistics(_admin: str = Depends(require_admin)):
     connection = None
     cursor = None
 
@@ -458,7 +499,7 @@ def get_statistics():
 # ============================================================
 
 @app.get("/analytics")
-def get_analytics():
+def get_analytics(_admin: str = Depends(require_admin)):
     connection = None
     cursor = None
 
@@ -523,7 +564,7 @@ APPLICATION_COLUMNS = """
 
 
 @app.get("/applications")
-def get_applications():
+def get_applications(_admin: str = Depends(require_admin)):
     connection = None
     cursor = None
 
@@ -550,7 +591,7 @@ def get_applications():
 
 
 @app.get("/applications/{application_id}")
-def get_application(application_id: int):
+def get_application(application_id: int, _admin: str = Depends(require_admin)):
     connection = None
     cursor = None
 
