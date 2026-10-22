@@ -1,30 +1,51 @@
 
 /* =========================================================
-   LOAN AI MANAGEMENT SYSTEM — PROFESSIONAL FINTECH UI
-   Append this stylesheet to the bottom of style.css
+   LOAN AI MANAGEMENT SYSTEM
+   Professional Fintech Dashboard Stylesheet
    ========================================================= */
+
+/* ---------- 1. GLOBAL VARIABLES ---------- */
 
 :root {
     --brand: #4169e1;
-    --brand-dark: #2549bd;
+    --brand-dark: #3154c5;
+    --brand-light: #edf2ff;
+
     --navy: #101a32;
-    --navy-light: #1b2945;
+    --navy-light: #1b2947;
+
     --page: #f4f7fc;
     --surface: #ffffff;
+
     --text: #18243b;
     --muted: #78859b;
     --border: #e5eaf3;
+
     --success: #159b72;
-    --danger: #dc5262;
-    --warning: #d99424;
-    --radius: 18px;
-    --shadow: 0 8px 28px rgba(28, 47, 83, 0.055);
+    --success-bg: #e6f7f0;
+
+    --danger: #d9485f;
+    --danger-bg: #fff0f2;
+
+    --warning: #c98517;
+    --warning-bg: #fff5df;
+
+    --shadow-sm: 0 3px 12px rgba(16, 26, 50, 0.05);
+    --shadow-md: 0 8px 28px rgba(16, 26, 50, 0.08);
+
+    --radius-sm: 8px;
+    --radius-md: 14px;
+    --radius-lg: 20px;
+
+    --sidebar-width: 250px;
 }
 
-/* RESET */
+/* ---------- 2. RESET ---------- */
 
 * {
     box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
 
 html {
@@ -33,12 +54,13 @@ html {
 }
 
 body {
-    margin: 0;
+    font-family: Inter, "Segoe UI", Arial, sans-serif;
     background: var(--page);
     color: var(--text);
-    font-family: Inter, "Segoe UI", Arial, sans-serif;
     font-size: 14px;
     line-height: 1.6;
+    min-height: 100vh;
+    overflow-x: hidden;
 }
 
 button,
@@ -50,246 +72,115 @@ textarea {
 
 button {
     cursor: pointer;
-    transition: background 0.2s ease, transform 0.2s ease,
-                box-shadow 0.2s ease;
 }
 
-button:focus-visible,
-a:focus-visible,
-input:focus-visible {
-    outline: 3px solid rgba(65, 105, 225, 0.3);
-    outline-offset: 3px;
+button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
 }
 
-[hidden] {
-    display: none !important;
+input,
+select,
+textarea {
+    color: var(--text);
 }
 
-/* =========================================================
-   SIDEBAR
-   ========================================================= */
+a {
+    color: var(--brand);
+    text-decoration: none;
+}
+
+img,
+canvas {
+    max-width: 100%;
+}
+
+::selection {
+    background: #dce6ff;
+    color: var(--navy);
+}
+
+/* ---------- 3. MAIN LAYOUT ---------- */
 
 .sidebar {
     position: fixed;
     inset: 0 auto 0 0;
-    width: 264px;
-    min-height: 100vh;
-    overflow-y: auto;
-    padding: 27px 18px 22px;
+    width: var(--sidebar-width);
+    height: 100vh;
+    padding: 28px 18px 20px;
     display: flex;
     flex-direction: column;
-    gap: 32px;
+    background: var(--navy);
     color: #ffffff;
-    background: linear-gradient(180deg, var(--navy) 0%, #14213e 100%);
-    box-shadow: 8px 0 30px rgba(16, 26, 50, 0.08);
     z-index: 100;
+    overflow-y: auto;
 }
+
+.main-content {
+    margin-left: var(--sidebar-width);
+    width: calc(100% - var(--sidebar-width));
+    min-height: 100vh;
+    padding: 28px 34px 40px;
+}
+
+/* ---------- 4. SIDEBAR BRAND ---------- */
 
 .logo {
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 0 8px;
+    padding: 4px 8px 30px;
+    color: #ffffff;
+    font-size: 18px;
+    font-weight: 750;
+    letter-spacing: -0.5px;
 }
 
 .logo-icon {
-    width: 46px;
-    height: 46px;
-    display: grid;
-    place-items: center;
+    width: 42px;
+    height: 42px;
     flex-shrink: 0;
-    border-radius: 15px;
-    color: white;
-    font-size: 24px;
-    font-weight: 800;
-    background: linear-gradient(135deg, #6285ff, #3156d5);
-    box-shadow: 0 7px 20px rgba(65, 105, 225, 0.32);
-}
-
-.logo h2 {
-    margin: 0;
-    color: #ffffff;
-    font-size: 20px;
-    letter-spacing: -0.6px;
-}
-
-.logo span {
-    display: block;
-    color: #aab7d0;
-    font-size: 11px;
-}
-
-.sidebar nav {
-    display: grid;
-    gap: 8px;
-}
-
-.sidebar nav a {
     display: flex;
     align-items: center;
-    min-height: 46px;
-    padding: 12px 15px;
-    border: 1px solid transparent;
-    border-radius: 11px;
-    color: #b7c2d8;
-    font-size: 13px;
-    font-weight: 600;
-    text-decoration: none;
-    transition: all 0.2s ease;
-}
-
-.sidebar nav a:hover {
+    justify-content: center;
+    border-radius: 13px;
+    background: linear-gradient(135deg, #6485ff, #4169e1);
     color: #ffffff;
-    background: rgba(255, 255, 255, 0.07);
-}
-
-.sidebar nav a.active {
-    color: #ffffff;
-    background: linear-gradient(100deg, #4169e1, #3658c4);
-    box-shadow: 0 6px 16px rgba(30, 64, 175, 0.26);
+    font-size: 21px;
+    font-weight: 800;
+    box-shadow: 0 5px 15px rgba(65, 105, 225, 0.28);
 }
 
 .sidebar-footer {
     margin-top: auto;
-    padding: 18px 14px 0;
-    border-top: 1px solid rgba(255, 255, 255, 0.12);
-}
-
-.sidebar-footer > p {
-    margin: 0 0 3px;
-    color: #f1f5ff;
+    padding: 20px 8px 4px;
+    color: #9caac4;
     font-size: 12px;
-    font-weight: 700;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.sidebar-footer > span {
-    color: #9eacc6;
-    font-size: 11px;
-}
-
-/* ADMIN LOGIN IN SIDEBAR */
-
-.admin-login-panel {
-    margin-top: 22px;
-    padding: 14px;
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 14px;
-    background: rgba(255, 255, 255, 0.045);
-}
-
-#adminAuthStatus {
-    margin: 0 0 12px;
-    color: #b9c8e5;
-    font-size: 11px;
-    overflow-wrap: anywhere;
-}
-
-#adminLoginForm label {
-    display: block;
-    margin: 10px 0 5px;
-    color: #d8e0f0;
-    font-size: 11px;
-    font-weight: 600;
-}
-
-#adminLoginForm input {
-    width: 100%;
-    min-width: 0;
-    min-height: 40px;
-    padding: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.14);
-    border-radius: 8px;
-    outline: none;
-    color: #ffffff;
-    background: rgba(4, 12, 28, 0.45);
-    font-size: 12px;
-}
-
-#adminLoginForm input::placeholder {
-    color: #8d9bb5;
-}
-
-#adminLoginForm input:focus {
-    border-color: #7795ff;
-    box-shadow: 0 0 0 3px rgba(65, 105, 225, 0.18);
-}
-
-#adminLoginButton,
-#adminLogoutButton {
-    width: 100%;
-    min-height: 40px;
-    margin-top: 13px;
-    padding: 10px;
-    border: none;
-    border-radius: 9px;
-    color: #ffffff;
-    background: var(--brand);
-    font-size: 12px;
-    font-weight: 700;
-}
-
-#adminLoginButton:hover,
-#adminLogoutButton:hover {
-    background: #5579ed;
-    box-shadow: 0 5px 14px rgba(65, 105, 225, 0.24);
-}
-
-#adminLoginButton:disabled {
-    opacity: 0.65;
-    cursor: wait;
-}
-
-#adminLogoutButton {
-    background: #35435e;
-}
-
-#adminLogoutButton:hover {
-    background: #465777;
-}
-
-/* =========================================================
-   MAIN LAYOUT AND PAGE HEADER
-   ========================================================= */
-
-.main-content {
-    width: calc(100% - 264px);
-    max-width: 1800px;
-    min-height: 100vh;
-    margin-left: 264px;
-    padding: 36px clamp(22px, 3.2vw, 52px) 60px;
-}
+/* ---------- 5. TOPBAR ---------- */
 
 .topbar {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 24px;
-    margin-bottom: 32px;
-    padding-bottom: 25px;
-    border-bottom: 1px solid var(--border);
-}
-
-.welcome,
-.section-label {
-    margin: 0 0 7px;
-    color: var(--brand);
-    font-size: 10px;
-    font-weight: 800;
-    letter-spacing: 1.5px;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 30px;
+    min-width: 0;
 }
 
 .topbar h1 {
-    margin: 0;
     color: var(--text);
-    font-size: clamp(25px, 2.4vw, 34px);
-    font-weight: 800;
-    letter-spacing: -1.2px;
-    line-height: 1.2;
+    font-size: clamp(23px, 2.4vw, 30px);
+    font-weight: 750;
+    letter-spacing: -0.8px;
+    line-height: 1.25;
 }
 
-.topbar p:not(.welcome) {
-    max-width: 610px;
-    margin: 10px 0 0;
+.topbar p {
+    margin-top: 7px;
     color: var(--muted);
     font-size: 13px;
 }
@@ -297,164 +188,252 @@ input:focus-visible {
 .status {
     display: inline-flex;
     align-items: center;
-    gap: 9px;
-    flex-shrink: 0;
-    padding: 10px 14px;
-    border: 1px solid #d7eee5;
+    justify-content: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border: 1px solid #cdeede;
     border-radius: 30px;
-    color: #13835f;
-    background: #ecfaf4;
-    font-size: 11px;
-    font-weight: 700;
+    background: #effbf5;
+    color: #13865f;
+    font-size: 12px;
+    font-weight: 650;
+    white-space: nowrap;
 }
 
-.status-dot {
-    width: 8px;
-    height: 8px;
+.status::before {
+    content: "";
+    width: 7px;
+    height: 7px;
     border-radius: 50%;
-    background: #16a574;
-    box-shadow: 0 0 0 4px rgba(22, 165, 116, 0.12);
+    background: #20b77f;
 }
 
-/* =========================================================
-   ADMIN KPI / STATISTICS CARDS
-   ========================================================= */
+/* ---------- 6. ADMIN LOGIN: TOP RIGHT ---------- */
 
-.statistics-grid {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 18px;
-    margin-bottom: 20px;
-}
+/* The login form should be a child of .topbar in index.html. */
 
-.stat-card {
-    position: relative;
+#adminLoginForm {
     display: flex;
     align-items: center;
-    gap: 15px;
-    min-width: 0;
-    padding: 23px 20px;
-    overflow: hidden;
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
+    justify-content: flex-end;
+    gap: 9px;
+    flex-wrap: wrap;
+    margin-left: auto;
+    padding: 10px;
     background: var(--surface);
-    box-shadow: var(--shadow);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: 1px solid var(--border);
+    border-radius: 13px;
+    box-shadow: var(--shadow-sm);
 }
 
-.stat-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 12px 32px rgba(28, 47, 83, 0.09);
+#adminLoginForm input {
+    width: 135px;
+    min-width: 0;
+    height: 39px;
+    padding: 9px 11px;
+    border: 1px solid #dce3ef;
+    border-radius: 8px;
+    background: #f8faff;
+    color: var(--text);
+    font-size: 12px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-.stat-icon {
-    display: grid;
-    place-items: center;
-    width: 48px;
-    height: 48px;
-    flex-shrink: 0;
-    border-radius: 14px;
-    color: #4169e1;
-    background: #edf2ff;
-    font-size: 21px;
+#adminLoginForm input::placeholder {
+    color: #8d99ad;
 }
 
-.stat-card.approved .stat-icon {
-    color: #159b72;
-    background: #e7f8f1;
+#adminLoginForm input:focus {
+    border-color: var(--brand);
+    box-shadow: 0 0 0 3px rgba(65, 105, 225, 0.12);
+    background: #ffffff;
 }
 
-.stat-card.rejected .stat-icon {
-    color: #dc5262;
-    background: #fff0f1;
+#adminLoginButton,
+#adminLogoutButton {
+    min-height: 39px;
+    padding: 9px 15px;
+    border: none;
+    border-radius: 8px;
+    background: var(--brand);
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+    transition: background 0.2s, transform 0.2s;
 }
 
-.stat-card.rate .stat-icon {
-    color: #9a6a11;
-    background: #fff5dd;
+#adminLoginButton:hover,
+#adminLogoutButton:hover {
+    background: var(--brand-dark);
+    transform: translateY(-1px);
 }
 
-.stat-card p {
-    margin: 0 0 4px;
+#adminAuthStatus {
+    flex-basis: 100%;
+    margin: 0;
     color: var(--muted);
     font-size: 11px;
-    font-weight: 600;
+    text-align: right;
 }
 
-.stat-card h2 {
-    margin: 0;
-    color: var(--text);
-    font-size: clamp(20px, 1.8vw, 28px);
-    font-weight: 800;
-    letter-spacing: -0.7px;
-    overflow-wrap: anywhere;
+#adminAuthStatus:empty {
+    display: none;
 }
 
-/* =========================================================
-   SECTION HEADERS
-   ========================================================= */
+/* ---------- 7. GENERAL SECTIONS ---------- */
 
 .dashboard-section {
-    margin-top: 32px;
-    scroll-margin-top: 28px;
+    margin-bottom: 28px;
+    min-width: 0;
+    scroll-margin-top: 24px;
 }
 
 .section-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 20px;
+    flex-wrap: wrap;
+    gap: 14px;
     margin-bottom: 18px;
 }
 
-.section-header h2 {
-    margin: 0;
+.section-header h2,
+.section-header h3 {
     color: var(--text);
-    font-size: 22px;
-    font-weight: 800;
-    letter-spacing: -0.6px;
+    font-size: 19px;
+    font-weight: 750;
+    letter-spacing: -0.4px;
 }
 
-.section-header p:not(.section-label) {
-    margin: 5px 0 0;
+.section-header p {
+    margin-top: 4px;
     color: var(--muted);
     font-size: 12px;
 }
 
-/* =========================================================
-   APPLICATION FORM AND PREDICTION RESULT
-   ========================================================= */
+/* ---------- 8. STATISTICS CARDS ---------- */
+
+.statistics-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 18px;
+    margin-bottom: 30px;
+}
+
+.stat-card {
+    position: relative;
+    min-width: 0;
+    padding: 22px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+}
+
+.stat-card h3 {
+    margin-bottom: 12px;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 650;
+}
+
+.stat-card .stat-value,
+.stat-card .value {
+    color: var(--text);
+    font-size: clamp(22px, 2vw, 30px);
+    font-weight: 800;
+    letter-spacing: -0.8px;
+    overflow-wrap: anywhere;
+}
+
+.stat-card p {
+    margin-top: 9px;
+    color: var(--muted);
+    font-size: 11px;
+}
+
+.stat-icon {
+    width: 43px;
+    height: 43px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 18px;
+    border-radius: 12px;
+    background: var(--brand-light);
+    color: var(--brand);
+    font-size: 20px;
+}
+
+.stat-card:nth-child(2) .stat-icon {
+    background: var(--success-bg);
+    color: var(--success);
+}
+
+.stat-card:nth-child(3) .stat-icon {
+    background: var(--danger-bg);
+    color: var(--danger);
+}
+
+.stat-card:nth-child(4) .stat-icon {
+    background: var(--warning-bg);
+    color: var(--warning);
+}
+
+/* ---------- 9. APPLICATION AND PREDICTION LAYOUT ---------- */
 
 .prediction-layout {
     display: grid;
     grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
-    align-items: start;
     gap: 22px;
+    align-items: start;
 }
 
 .prediction-card,
 .result-card,
 .chart-card {
     min-width: 0;
-    padding: 27px;
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
+    padding: 25px;
     background: var(--surface);
-    box-shadow: var(--shadow);
-}
-
-#loanForm {
-    display: grid;
-    gap: 16px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
 }
 
 .form-title {
-    margin: 4px 0 0;
-    padding-bottom: 11px;
-    border-bottom: 1px solid var(--border);
+    margin-bottom: 20px;
     color: var(--text);
-    font-size: 15px;
-    font-weight: 800;
+    font-size: 18px;
+    font-weight: 750;
+}
+
+.prediction-card > p,
+.result-card > p {
+    margin-bottom: 18px;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+/* ---------- 10. FORM FIELDS ---------- */
+
+#loanForm {
+    display: flex;
+    flex-direction: column;
+    gap: 17px;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
 }
 
 .form-group {
@@ -465,7 +444,7 @@ input:focus-visible {
 }
 
 .form-group label {
-    color: #3e4b63;
+    color: #42506a;
     font-size: 12px;
     font-weight: 700;
 }
@@ -474,532 +453,548 @@ input:focus-visible {
 .form-group select,
 .form-group textarea {
     width: 100%;
-    min-height: 46px;
-    padding: 12px 14px;
-    border: 1px solid #dfe5ef;
-    border-radius: 10px;
-    outline: none;
-    color: var(--text);
+    min-width: 0;
+    min-height: 44px;
+    padding: 11px 13px;
+    border: 1px solid #dce3ef;
+    border-radius: 9px;
     background: #fbfcff;
+    color: var(--text);
     font-size: 13px;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
 }
 
-.form-group input::placeholder {
-    color: #a0aabd;
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+    color: #9aa5b7;
 }
 
 .form-group input:focus,
 .form-group select:focus,
 .form-group textarea:focus {
-    border-color: #6685ed;
+    border-color: var(--brand);
     background: #ffffff;
-    box-shadow: 0 0 0 4px rgba(65, 105, 225, 0.09);
+    box-shadow: 0 0 0 3px rgba(65, 105, 225, 0.1);
 }
 
-.form-row {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 16px;
+.form-group textarea {
+    min-height: 100px;
+    resize: vertical;
 }
 
-#predictButton {
+/* ---------- 11. BUTTONS ---------- */
+
+#predictButton,
+.primary-button {
     width: 100%;
-    min-height: 49px;
-    margin-top: 4px;
-    padding: 13px 18px;
-    border: 0;
-    border-radius: 11px;
-    color: white;
-    background: linear-gradient(100deg, #4169e1, #3156c9);
-    box-shadow: 0 7px 17px rgba(65, 105, 225, 0.19);
+    min-height: 46px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    padding: 12px 18px;
+    border: none;
+    border-radius: 9px;
+    background: linear-gradient(135deg, #4169e1, #3154c5);
+    color: #ffffff;
     font-size: 13px;
-    font-weight: 800;
+    font-weight: 750;
+    box-shadow: 0 5px 14px rgba(65, 105, 225, 0.2);
+    transition: transform 0.2s, box-shadow 0.2s;
 }
 
-#predictButton:hover {
+#predictButton:hover,
+.primary-button:hover {
     transform: translateY(-1px);
-    background: linear-gradient(100deg, #355bd2, #2447b5);
-    box-shadow: 0 10px 22px rgba(65, 105, 225, 0.24);
+    box-shadow: 0 8px 18px rgba(65, 105, 225, 0.26);
 }
 
-#predictButton:disabled {
-    opacity: 0.65;
-    cursor: wait;
-    transform: none;
+.secondary-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 38px;
+    padding: 9px 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: #ffffff;
+    color: var(--text);
+    font-size: 12px;
+    font-weight: 650;
+    transition: background 0.2s, border-color 0.2s;
 }
 
-/* RESULT CARD */
+.secondary-button:hover {
+    background: #f5f7fc;
+    border-color: #c8d3e5;
+}
+
+.refresh-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 38px;
+    padding: 9px 13px;
+    border: 1px solid #d9e3ff;
+    border-radius: 8px;
+    background: var(--brand-light);
+    color: var(--brand);
+    font-size: 12px;
+    font-weight: 700;
+    transition: background 0.2s;
+}
+
+.refresh-button:hover {
+    background: #dfe8ff;
+}
+
+/* ---------- 12. PREDICTION RESULT ---------- */
 
 .result-card {
-    min-height: 360px;
-    overflow-wrap: anywhere;
+    min-height: 260px;
 }
 
 .result-placeholder {
-    min-height: 300px;
+    min-height: 210px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    gap: 12px;
+    padding: 20px;
+    color: var(--muted);
     text-align: center;
 }
 
-.result-icon {
-    display: grid;
-    place-items: center;
-    width: 62px;
-    height: 62px;
-    margin: 0 auto 16px;
-    border-radius: 20px;
-    color: #4169e1;
-    background: #edf2ff;
-    font-size: 22px;
-    font-weight: 900;
-}
-
-.result-placeholder h3 {
-    margin: 0;
-    color: var(--text);
-    font-size: 17px;
-}
-
-.result-placeholder p {
-    max-width: 290px;
-    margin: 10px 0 0;
-    color: var(--muted);
-    font-size: 12px;
-}
-
-.prediction-result > .result-icon {
-    margin-left: 0;
-}
-
-.prediction-result > h2 {
-    margin: 3px 0 16px;
-    font-size: 24px;
-    line-height: 1.3;
-}
-
-.success-message {
-    color: var(--success);
-}
-
-.failure-message {
-    color: var(--danger);
-}
-
-.applicant-summary {
-    margin: 15px 0 20px;
-    padding: 14px;
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    background: #f8faff;
-}
-
-.applicant-summary h3 {
-    margin: 0;
-    color: var(--text);
-    font-size: 15px;
-}
-
-.applicant-summary p {
-    margin: 4px 0 0;
-    color: var(--muted);
-    font-size: 11px;
-}
-
-.risk-display,
-.probability-label {
+.result-placeholder::before {
+    content: "?";
+    width: 58px;
+    height: 58px;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-}
-
-.risk-display {
-    margin: 16px 0;
-    color: var(--muted);
-    font-size: 12px;
-}
-
-.risk-low,
-.risk-medium,
-.risk-high {
-    display: inline-block;
-    padding: 5px 9px;
-    border-radius: 7px;
-    font-size: 10px;
+    justify-content: center;
+    border-radius: 18px;
+    background: var(--brand-light);
+    color: var(--brand);
+    font-size: 28px;
     font-weight: 800;
 }
 
-.risk-low {
-    color: #12815e;
-    background: #e5f8f0;
+.result-placeholder p {
+    max-width: 250px;
+    font-size: 13px;
 }
 
-.risk-medium {
-    color: #99650c;
-    background: #fff3d8;
-}
-
-.risk-high {
-    color: #c53f51;
-    background: #ffeaed;
-}
-
-.probability {
-    margin: 18px 0;
-}
-
-.probability-label {
-    margin-bottom: 9px;
-    color: #66748b;
-    font-size: 11px;
-}
-
-.probability-label strong {
-    color: var(--text);
-    font-size: 12px;
-}
-
-.progress {
-    height: 8px;
-    overflow: hidden;
-    border-radius: 20px;
-    background: #eaf0fa;
-}
-
-.progress-bar {
-    height: 100%;
-    border-radius: inherit;
-    background: linear-gradient(90deg, #4169e1, #64a2ff);
-    transition: width 0.5s ease;
-}
-
-.assessment-details {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 12px;
-    margin-top: 23px;
-    padding-top: 19px;
-    border-top: 1px solid var(--border);
-}
-
-.assessment-details > div {
-    padding: 11px;
-    border-radius: 10px;
-    background: #f6f8fc;
-}
-
-.assessment-details span,
-.assessment-details strong {
+.prediction-result {
     display: block;
+    padding: 18px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: #fbfcff;
 }
 
-.assessment-details span {
-    margin-bottom: 4px;
-    color: var(--muted);
-    font-size: 10px;
+.prediction-result h3 {
+    margin-bottom: 12px;
+    font-size: 18px;
 }
 
-.assessment-details strong {
-    color: var(--text);
+.prediction-result p {
+    margin: 8px 0;
+    color: #4b5870;
     font-size: 13px;
     overflow-wrap: anywhere;
 }
 
-.storage-message {
-    margin: 18px 0 8px;
-    color: var(--success);
-    font-size: 11px;
-    font-weight: 700;
+.prediction-result strong {
+    color: var(--text);
 }
 
-/* =========================================================
-   ANALYTICS CHARTS
-   ========================================================= */
+.approved-badge,
+.rejected-badge,
+.risk-low,
+.risk-medium,
+.risk-high {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px 10px;
+    border-radius: 30px;
+    font-size: 11px;
+    font-weight: 750;
+    white-space: nowrap;
+}
+
+.approved-badge,
+.risk-low {
+    background: var(--success-bg);
+    color: #117c5b;
+}
+
+.rejected-badge,
+.risk-high {
+    background: var(--danger-bg);
+    color: #c3324a;
+}
+
+.risk-medium {
+    background: var(--warning-bg);
+    color: #98620e;
+}
+
+/* ---------- 13. CHARTS ---------- */
 
 .charts-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 20px;
+    gap: 22px;
 }
 
 .chart-card {
-    padding: 25px;
+    min-height: 320px;
 }
 
 .chart-card h3 {
-    margin: 0;
+    margin-bottom: 5px;
     color: var(--text);
-    font-size: 15px;
-    font-weight: 800;
+    font-size: 16px;
+    font-weight: 750;
 }
 
-.chart-card > p {
-    margin: 6px 0 20px;
+.chart-card p {
+    margin-bottom: 20px;
     color: var(--muted);
-    font-size: 11px;
+    font-size: 12px;
 }
 
 .chart-container {
     position: relative;
     width: 100%;
-    height: 280px;
+    height: 245px;
+    min-width: 0;
 }
 
-/* =========================================================
-   APPLICATION HISTORY TABLE
-   ========================================================= */
+.chart-container canvas {
+    width: 100% !important;
+    max-width: 100%;
+}
+
+/* ---------- 14. APPLICATIONS TABLE ---------- */
 
 .table-container {
     width: 100%;
     overflow-x: auto;
     border: 1px solid var(--border);
-    border-radius: var(--radius);
-    background: #ffffff;
-    box-shadow: var(--shadow);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    box-shadow: var(--shadow-sm);
+    scrollbar-width: thin;
 }
 
-.table-container table {
+#applicationsTable {
     width: 100%;
-    min-width: 950px;
-    border-collapse: separate;
-    border-spacing: 0;
+    min-width: 760px;
+    border-collapse: collapse;
     text-align: left;
 }
 
-.table-container thead th {
-    padding: 15px 16px;
+#applicationsTable thead {
+    background: #f6f8fd;
+}
+
+#applicationsTable th {
+    padding: 15px 17px;
     border-bottom: 1px solid var(--border);
-    color: #64728a;
-    background: #f7f9fd;
-    font-size: 10px;
-    font-weight: 800;
-    letter-spacing: 0.5px;
+    color: #64718a;
+    font-size: 11px;
+    font-weight: 750;
     text-transform: uppercase;
+    letter-spacing: 0.45px;
     white-space: nowrap;
 }
 
-.table-container tbody td {
-    padding: 16px;
+#applicationsTable td {
+    padding: 15px 17px;
     border-bottom: 1px solid #edf0f6;
-    color: #47556c;
+    color: #42506a;
     font-size: 12px;
     vertical-align: middle;
 }
 
-.table-container tbody tr:last-child td {
-    border-bottom: none;
+#applicationsTable tbody tr {
+    transition: background 0.15s;
 }
 
-.table-container tbody tr {
-    transition: background 0.15s ease;
-}
-
-.table-container tbody tr:hover {
+#applicationsTable tbody tr:hover {
     background: #f8faff;
 }
 
-.table-container td strong {
+#applicationsTable tbody tr:last-child td {
+    border-bottom: none;
+}
+
+#applicationsTable td:first-child {
     color: var(--text);
     font-weight: 700;
 }
 
-.table-container td small {
-    display: inline-block;
-    margin-top: 3px;
-    color: var(--muted);
-    font-size: 10px;
-}
+/* ---------- 15. ADMIN LOGIN STATUS / MESSAGES ---------- */
 
-.approved-badge,
-.rejected-badge {
-    display: inline-block;
-    padding: 6px 9px;
-    border-radius: 7px;
-    font-size: 10px;
-    font-weight: 800;
-    white-space: nowrap;
-}
-
-.approved-badge {
-    color: #13835f;
-    background: #e6f8f0;
-}
-
-.rejected-badge {
-    color: #c63e50;
-    background: #ffebee;
-}
-
-.loading {
-    padding: 28px !important;
-    color: var(--muted) !important;
-    text-align: center;
-}
-
-.refresh-button {
-    padding: 10px 15px;
-    border: 1px solid #dce4f4;
+.success-message {
+    padding: 11px 14px;
+    border: 1px solid #cdeede;
     border-radius: 9px;
-    color: var(--brand);
-    background: #ffffff;
-    font-size: 11px;
-    font-weight: 800;
+    background: var(--success-bg);
+    color: #117c5b;
+    font-size: 12px;
 }
 
-.refresh-button:hover {
-    border-color: var(--brand);
-    background: #f1f5ff;
+.error-message {
+    padding: 11px 14px;
+    border: 1px solid #f4cbd2;
+    border-radius: 9px;
+    background: var(--danger-bg);
+    color: #b52f46;
+    font-size: 12px;
 }
 
-/* =========================================================
-   RESPONSIVE TABLETS
-   ========================================================= */
+.warning-message {
+    padding: 11px 14px;
+    border: 1px solid #f0dfb9;
+    border-radius: 9px;
+    background: var(--warning-bg);
+    color: #98620e;
+    font-size: 12px;
+}
 
-@media (max-width: 1250px) {
-    .sidebar {
-        width: 235px;
+/* ---------- 16. ADMIN-ONLY CONTENT ---------- */
+
+/* Visibility is controlled by your JavaScript authentication logic. */
+[data-admin-only][hidden] {
+    display: none !important;
+}
+
+/* ---------- 17. SCROLLBARS ---------- */
+
+.sidebar::-webkit-scrollbar,
+.table-container::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    background: #34415e;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    background: #cbd4e3;
+}
+
+/* ---------- 18. TABLET RESPONSIVENESS ---------- */
+
+@media (max-width: 1200px) {
+    :root {
+        --sidebar-width: 220px;
     }
 
     .main-content {
-        width: calc(100% - 235px);
-        margin-left: 235px;
-        padding-right: 25px;
-        padding-left: 25px;
+        padding: 25px 24px 35px;
     }
 
     .statistics-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .topbar {
+        align-items: flex-start;
+    }
+
+    #adminLoginForm {
+        max-width: 100%;
+    }
+
+    #adminLoginForm input {
+        width: 120px;
     }
 
     .prediction-layout {
         grid-template-columns: minmax(0, 1fr);
     }
-
-    .result-card {
-        min-height: 280px;
-    }
 }
 
-/* =========================================================
-   RESPONSIVE MOBILE
-   ========================================================= */
+@media (max-width: 900px) {
+    :root {
+        --sidebar-width: 190px;
+    }
 
-@media (max-width: 760px) {
     .sidebar {
-        position: relative;
-        width: 100%;
-        min-height: auto;
-        max-height: none;
-        padding: 17px;
-        gap: 20px;
+        padding: 22px 12px 16px;
     }
 
-    .sidebar nav {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+    .logo {
+        padding-left: 5px;
+        gap: 9px;
+        font-size: 15px;
     }
 
-    .sidebar nav a {
-        justify-content: center;
-        padding: 10px 6px;
-        text-align: center;
-        font-size: 11px;
-    }
-
-    .sidebar-footer {
-        margin-top: 0;
-        padding: 15px 0 0;
-    }
-
-    .admin-login-panel {
-        max-width: 440px;
+    .logo-icon {
+        width: 36px;
+        height: 36px;
     }
 
     .main-content {
-        width: 100%;
-        margin-left: 0;
-        padding: 25px 16px 40px;
-    }
-
-    .topbar {
-        align-items: flex-start;
-        flex-direction: column;
-        gap: 15px;
-        margin-bottom: 23px;
-    }
-
-    .topbar h1 {
-        font-size: 28px;
-    }
-
-    .statistics-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 11px;
-    }
-
-    .stat-card {
-        gap: 10px;
-        padding: 15px 12px;
-    }
-
-    .stat-icon {
-        width: 38px;
-        height: 38px;
-        border-radius: 11px;
-        font-size: 17px;
-    }
-
-    .stat-card h2 {
-        font-size: 21px;
-    }
-
-    .stat-card p {
-        font-size: 10px;
-    }
-
-    .dashboard-section {
-        margin-top: 27px;
-    }
-
-    .section-header {
-        align-items: flex-start;
-        flex-direction: column;
-    }
-
-    .section-header h2 {
-        font-size: 20px;
-    }
-
-    .prediction-card,
-    .result-card,
-    .chart-card {
-        padding: 19px;
-    }
-
-    .form-row {
-        grid-template-columns: minmax(0, 1fr);
-        gap: 14px;
+        padding: 22px 18px 30px;
     }
 
     .charts-grid {
         grid-template-columns: minmax(0, 1fr);
     }
 
-    .chart-container {
-        height: 250px;
+    #adminLoginForm {
+        flex-basis: 100%;
+        justify-content: flex-end;
     }
 
-    .table-container table {
-        min-width: 950px;
+    #adminAuthStatus {
+        text-align: right;
     }
 }
 
-/* =========================================================
-   SMALL MOBILE
-   ========================================================= */
+/* ---------- 19. MOBILE RESPONSIVENESS ---------- */
+
+@media (max-width: 650px) {
+    :root {
+        --sidebar-width: 0px;
+    }
+
+    .sidebar {
+        position: relative;
+        inset: auto;
+        width: 100%;
+        height: auto;
+        min-height: auto;
+        padding: 13px 16px;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        overflow: visible;
+    }
+
+    .logo {
+        padding: 0;
+        font-size: 16px;
+    }
+
+    .logo-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+    }
+
+    .sidebar-footer {
+        display: none;
+    }
+
+    .main-content {
+        width: 100%;
+        margin-left: 0;
+        padding: 22px 15px 30px;
+    }
+
+    .topbar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 16px;
+        margin-bottom: 23px;
+    }
+
+    .topbar h1 {
+        font-size: 25px;
+    }
+
+    .topbar > div {
+        max-width: 100%;
+    }
+
+    .status {
+        align-self: flex-start;
+    }
+
+    #adminLoginForm {
+        width: 100%;
+        margin-left: 0;
+        justify-content: stretch;
+        padding: 12px;
+    }
+
+    #adminLoginForm input {
+        flex: 1 1 130px;
+        width: auto;
+    }
+
+    #adminLoginButton,
+    #adminLogoutButton {
+        flex: 0 0 auto;
+    }
+
+    #adminAuthStatus {
+        text-align: left;
+    }
+
+    .statistics-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+    }
+
+    .stat-card {
+        padding: 16px;
+    }
+
+    .stat-card .stat-value,
+    .stat-card .value {
+        font-size: 23px;
+    }
+
+    .stat-icon {
+        width: 36px;
+        height: 36px;
+        margin-bottom: 13px;
+    }
+
+    .section-header h2,
+    .section-header h3 {
+        font-size: 17px;
+    }
+
+    .prediction-card,
+    .result-card,
+    .chart-card {
+        padding: 18px;
+    }
+
+    .form-row {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 15px;
+    }
+
+    .chart-card {
+        min-height: 290px;
+    }
+
+    .chart-container {
+        height: 220px;
+    }
+
+    .dashboard-section {
+        margin-bottom: 23px;
+    }
+}
+
+/* ---------- 20. SMALL MOBILE SCREENS ---------- */
 
 @media (max-width: 380px) {
     .main-content {
@@ -1011,25 +1006,46 @@ input:focus-visible {
         grid-template-columns: minmax(0, 1fr);
     }
 
-    .sidebar nav a {
-        font-size: 10px;
+    #adminLoginForm {
+        flex-direction: column;
+        align-items: stretch;
     }
 
-    .assessment-details {
-        gap: 8px;
+    #adminLoginForm input,
+    #adminLoginButton,
+    #adminLogoutButton {
+        width: 100%;
+    }
+
+    #adminAuthStatus {
+        text-align: center;
+    }
+
+    .prediction-card,
+    .result-card,
+    .chart-card {
+        padding: 14px;
     }
 }
 
-/* =========================================================
-   ACCESSIBILITY: REDUCED MOTION
-   ========================================================= */
+/* ---------- 21. ACCESSIBILITY ---------- */
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+    outline: 3px solid rgba(65, 105, 225, 0.35);
+    outline-offset: 2px;
+}
 
 @media (prefers-reduced-motion: reduce) {
     *,
     *::before,
     *::after {
         scroll-behavior: auto !important;
-        animation-duration: 0.01ms !important;
         transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
     }
 }
