@@ -3,547 +3,114 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+    <meta name="theme-color" content="#101a32">
     <title>Loan AI | Management System</title>
     <link rel="stylesheet" href="style.css">
-
-    <style>
-        [hidden] {
-            display: none !important;
-        }
-
-        .admin-login-panel {
-            margin-top: 18px;
-        }
-
-        .admin-login-panel label {
-            display: block;
-            margin-top: 8px;
-        }
-
-        .admin-login-panel input {
-            width: 100%;
-            box-sizing: border-box;
-            margin: 4px 0 8px;
-        }
-
-        .admin-login-panel button {
-            width: 100%;
-            margin-top: 6px;
-        }
-
-        #adminAuthStatus {
-            overflow-wrap: anywhere;
-        }
-    </style>
+    <style>[hidden] { display: none !important; }</style>
 </head>
-
 <body>
-
-    <!-- SIDEBAR -->
     <aside class="sidebar">
-
         <div class="logo">
             <div class="logo-icon">L</div>
-
-            <div>
-                <h2>Loan AI</h2>
-                <span>Management System</span>
-            </div>
+            <div class="logo-copy"><h2>Loan AI</h2><span>Management System</span></div>
         </div>
-
-        <nav>
+        <nav class="sidebar-nav" aria-label="Main navigation">
             <a href="#" class="active">Dashboard</a>
-
             <a href="#prediction">New Application</a>
-
-            <a href="#analytics"
-               data-admin-only
-               hidden>
-                Analytics
-            </a>
-
-            <a href="#history"
-               data-admin-only
-               hidden>
-                Applications
-            </a>
+            <a href="#analytics" data-admin-only hidden>Analytics</a>
+            <a href="#history" data-admin-only hidden>Applications</a>
         </nav>
-
-        <div class="sidebar-footer">
-            <p>AI Loan Intelligence</p>
-            <span>FastAPI + PostgreSQL</span>
-
-            <!-- ADMIN LOGIN -->
-            <div class="admin-login-panel">
-
-                <p id="adminAuthStatus" aria-live="polite">
-                    Admin dashboard locked
-                </p>
-
-                <form id="adminLoginForm">
-
-                    <label for="adminUsername">
-                        Admin username
-                    </label>
-
-                    <input
-                        id="adminUsername"
-                        type="text"
-                        autocomplete="username"
-                        placeholder="Admin username"
-                        required
-                    >
-
-                    <label for="adminPassword">
-                        Admin password
-                    </label>
-
-                    <input
-                        id="adminPassword"
-                        type="password"
-                        autocomplete="current-password"
-                        placeholder="Admin password"
-                        required
-                    >
-
-                    <button type="submit" id="adminLoginButton">
-                        Admin Login
-                    </button>
-
-                </form>
-
-                <button
-                    type="button"
-                    id="adminLogoutButton"
-                    hidden
-                >
-                    Admin Logout
-                </button>
-
-            </div>
-        </div>
-
+        <div class="sidebar-footer"><p>AI Loan Intelligence</p><span>FastAPI + PostgreSQL</span></div>
     </aside>
 
-
-    <!-- MAIN CONTENT -->
     <main class="main-content">
-
-        <!-- HEADER -->
         <header class="topbar">
-
-            <div>
-                <p class="welcome">AI Loan Intelligence</p>
-
+            <div class="topbar-heading">
+                <p class="welcome">AI LOAN INTELLIGENCE</p>
                 <h1>Loan Application</h1>
-
-                <p>
-                    Submit your application below. Administrative statistics
-                    and applicant records require admin login.
-                </p>
+                <p class="topbar-description">Submit an application for AI-powered assessment. Administrative statistics and applicant records require admin login.</p>
             </div>
-
-            <div class="status">
-                <span class="status-dot"></span>
-                API Connected
+            <div class="topbar-actions">
+                <div class="status"><span class="status-dot" aria-hidden="true"></span>API Connected</div>
+                <div class="admin-login-panel">
+                    <div class="admin-panel-heading">
+                        <span class="admin-avatar" aria-hidden="true">A</span>
+                        <div><h2>Administrator</h2><p id="adminAuthStatus" aria-live="polite">Admin dashboard locked</p></div>
+                    </div>
+                    <form id="adminLoginForm">
+                        <label class="sr-only" for="adminUsername">Admin username</label>
+                        <input id="adminUsername" name="username" type="text" autocomplete="username" placeholder="Admin username" aria-label="Admin username" required>
+                        <label class="sr-only" for="adminPassword">Admin password</label>
+                        <input id="adminPassword" name="password" type="password" autocomplete="current-password" placeholder="Admin password" aria-label="Admin password" required>
+                        <button type="submit" id="adminLoginButton">Admin Login</button>
+                    </form>
+                    <button type="button" id="adminLogoutButton" hidden>Admin Logout</button>
+                </div>
             </div>
-
         </header>
 
-
-        <!-- ADMIN STATISTICS -->
-        <section
-            class="statistics-grid"
-            data-admin-only
-            hidden
-        >
-
-            <div class="stat-card">
-                <div class="stat-icon">📊</div>
-
-                <div>
-                    <p>Applications</p>
-                    <h2 id="totalApplications">0</h2>
-                </div>
-            </div>
-
-            <div class="stat-card approved">
-                <div class="stat-icon">✓</div>
-
-                <div>
-                    <p>Approved</p>
-                    <h2 id="approvedLoans">0</h2>
-                </div>
-            </div>
-
-            <div class="stat-card rejected">
-                <div class="stat-icon">✕</div>
-
-                <div>
-                    <p>Rejected</p>
-                    <h2 id="rejectedLoans">0</h2>
-                </div>
-            </div>
-
-            <div class="stat-card rate">
-                <div class="stat-icon">%</div>
-
-                <div>
-                    <p>Approval Rate</p>
-                    <h2 id="approvalRate">0%</h2>
-                </div>
-            </div>
-
+        <section class="statistics-grid" data-admin-only hidden aria-label="Application statistics">
+            <article class="stat-card"><div class="stat-icon">▦</div><div><p>Applications</p><h2 id="totalApplications">0</h2></div></article>
+            <article class="stat-card approved"><div class="stat-icon">✓</div><div><p>Approved</p><h2 id="approvedLoans">0</h2></div></article>
+            <article class="stat-card rejected"><div class="stat-icon">×</div><div><p>Rejected</p><h2 id="rejectedLoans">0</h2></div></article>
+            <article class="stat-card rate"><div class="stat-icon">%</div><div><p>Approval Rate</p><h2 id="approvalRate">0%</h2></div></article>
         </section>
 
-
-        <!-- ADDITIONAL ADMIN STATISTICS -->
-        <section
-            class="statistics-grid"
-            data-admin-only
-            hidden
-        >
-
-            <div class="stat-card">
-                <div class="stat-icon">💰</div>
-
-                <div>
-                    <p>Average Income</p>
-                    <h2 id="averageIncome">0</h2>
-                </div>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-icon">⭐</div>
-
-                <div>
-                    <p>Average Credit</p>
-                    <h2 id="averageCredit">0</h2>
-                </div>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-icon">💵</div>
-
-                <div>
-                    <p>Average Loan</p>
-                    <h2 id="averageLoan">0</h2>
-                </div>
-            </div>
-
+        <section class="statistics-grid additional-stats" data-admin-only hidden aria-label="Financial statistics">
+            <article class="stat-card"><div class="stat-icon">KSh</div><div><p>Average Income</p><h2 id="averageIncome">0</h2></div></article>
+            <article class="stat-card"><div class="stat-icon">★</div><div><p>Average Credit</p><h2 id="averageCredit">0</h2></div></article>
+            <article class="stat-card"><div class="stat-icon">↗</div><div><p>Average Loan</p><h2 id="averageLoan">0</h2></div></article>
         </section>
 
-
-        <!-- PUBLIC LOAN APPLICATION FORM -->
-        <section
-            id="prediction"
-            class="dashboard-section"
-        >
-
-            <div class="section-header">
-                <div>
-                    <p class="section-label">NEW APPLICATION</p>
-
-                    <h2>Applicant Assessment</h2>
-
-                    <p>
-                        Enter applicant information for AI-powered
-                        loan assessment.
-                    </p>
-                </div>
-            </div>
-
-
+        <section id="prediction" class="dashboard-section">
+            <div class="section-header"><div><p class="section-label">NEW APPLICATION</p><h2>Applicant Assessment</h2><p>Enter applicant information for an AI-powered loan assessment.</p></div></div>
             <div class="prediction-layout">
-
-                <!-- FORM -->
                 <div class="prediction-card">
-
                     <form id="loanForm">
-
-                        <h3 class="form-title">
-                            Applicant Information
-                        </h3>
-
-                        <div class="form-group">
-                            <label for="applicant_name">
-                                Full Name
-                            </label>
-
-                            <input
-                                type="text"
-                                id="applicant_name"
-                                placeholder="John Doe"
-                                maxlength="150"
-                                required
-                            >
-                        </div>
-
-                        <div class="form-group">
-                            <label for="email">
-                                Email Address
-                            </label>
-
-                            <input
-                                type="email"
-                                id="email"
-                                placeholder="john@example.com"
-                                required
-                            >
-                        </div>
-
-                        <div class="form-group">
-                            <label for="phone">
-                                Phone Number
-                            </label>
-
-                            <input
-                                type="tel"
-                                id="phone"
-                                placeholder="0712345678"
-                                required
-                            >
-                        </div>
-
-
-                        <h3 class="form-title">
-                            Financial Information
-                        </h3>
-
+                        <h3 class="form-title">Applicant Information</h3>
+                        <div class="form-group"><label for="applicant_name">Full Name</label><input type="text" id="applicant_name" name="applicant_name" placeholder="John Doe" maxlength="150" autocomplete="name" required></div>
+                        <div class="form-group"><label for="email">Email Address</label><input type="email" id="email" name="email" placeholder="john@example.com" autocomplete="email" required></div>
+                        <div class="form-group"><label for="phone">Phone Number</label><input type="tel" id="phone" name="phone" placeholder="0712345678" autocomplete="tel" required></div>
+                        <div class="form-divider"></div>
+                        <h3 class="form-title">Financial Information</h3>
                         <div class="form-row">
-
-                            <div class="form-group">
-                                <label for="income">
-                                    Annual Income
-                                </label>
-
-                                <input
-                                    type="number"
-                                    id="income"
-                                    min="0"
-                                    step="0.01"
-                                    placeholder="50000"
-                                    required
-                                >
-                            </div>
-
-                            <div class="form-group">
-                                <label for="age">Age</label>
-
-                                <input
-                                    type="number"
-                                    id="age"
-                                    min="18"
-                                    max="120"
-                                    step="1"
-                                    placeholder="30"
-                                    required
-                                >
-                            </div>
-
+                            <div class="form-group"><label for="income">Annual Income (KSh)</label><input type="number" id="income" name="income" min="0" step="0.01" placeholder="50000" inputmode="decimal" required></div>
+                            <div class="form-group"><label for="age">Age</label><input type="number" id="age" name="age" min="18" max="120" step="1" placeholder="30" inputmode="numeric" required></div>
                         </div>
-
-
                         <div class="form-row">
-
-                            <div class="form-group">
-                                <label for="loan_amount">
-                                    Loan Amount
-                                </label>
-
-                                <input
-                                    type="number"
-                                    id="loan_amount"
-                                    min="0.01"
-                                    step="0.01"
-                                    placeholder="250000"
-                                    required
-                                >
-                            </div>
-
-                            <div class="form-group">
-                                <label for="credit_score">
-                                    Credit Score
-                                </label>
-
-                                <input
-                                    type="number"
-                                    id="credit_score"
-                                    min="0"
-                                    max="1000"
-                                    step="1"
-                                    placeholder="650"
-                                    required
-                                >
-                            </div>
-
+                            <div class="form-group"><label for="loan_amount">Loan Amount (KSh)</label><input type="number" id="loan_amount" name="loan_amount" min="0.01" step="0.01" placeholder="250000" inputmode="decimal" required></div>
+                            <div class="form-group"><label for="credit_score">Credit Score</label><input type="number" id="credit_score" name="credit_score" min="0" max="1000" step="1" placeholder="650" inputmode="numeric" required></div>
                         </div>
-
-
-                        <button
-                            type="submit"
-                            id="predictButton"
-                        >
-                            Assess Loan Application
-                        </button>
-
+                        <button type="submit" id="predictButton"><span>Assess Loan Application</span><span aria-hidden="true">→</span></button>
+                        <p class="form-note">Please check that the information entered is accurate before submitting.</p>
                     </form>
-
                 </div>
-
-
-                <!-- PREDICTION RESULT -->
-                <div class="result-card" id="resultCard">
-
-                    <div class="result-placeholder">
-
-                        <div class="result-icon">AI</div>
-
-                        <h3>Ready for Assessment</h3>
-
-                        <p>
-                            Enter applicant information and submit
-                            the application to receive an AI-powered
-                            assessment.
-                        </p>
-
-                    </div>
-
+                <div class="result-card" id="resultCard" aria-live="polite">
+                    <div class="result-placeholder"><div class="result-icon">AI</div><p class="section-label">AI ASSESSMENT</p><h3>Ready for Assessment</h3><p>Enter applicant information and submit the form to see the assessment result.</p></div>
                 </div>
-
             </div>
-
         </section>
 
-
-        <!-- ADMIN ANALYTICS -->
-        <section
-            id="analytics"
-            class="dashboard-section"
-            data-admin-only
-            hidden
-        >
-
-            <div class="section-header">
-                <div>
-                    <p class="section-label">ANALYTICS</p>
-
-                    <h2>Loan Analytics</h2>
-
-                    <p>
-                        Analysis of loan application results.
-                    </p>
-                </div>
-            </div>
-
-
+        <section id="analytics" class="dashboard-section" data-admin-only hidden>
+            <div class="section-header"><div><p class="section-label">ANALYTICS</p><h2>Loan Analytics</h2><p>Review the distribution of recorded loan application results.</p></div></div>
             <div class="charts-grid">
-
-                <div class="chart-card">
-                    <h3>Approval Distribution</h3>
-
-                    <p>
-                        Approved versus rejected applications.
-                    </p>
-
-                    <div class="chart-container">
-                        <canvas id="approvalChart"></canvas>
-                    </div>
-                </div>
-
-
-                <div class="chart-card">
-                    <h3>Application Overview</h3>
-
-                    <p>
-                        Number of applications by result.
-                    </p>
-
-                    <div class="chart-container">
-                        <canvas id="predictionChart"></canvas>
-                    </div>
-                </div>
-
+                <article class="chart-card"><div class="chart-heading"><div><h3>Approval Distribution</h3><p>Approved versus rejected applications.</p></div></div><div class="chart-container"><canvas id="approvalChart"></canvas></div></article>
+                <article class="chart-card"><div class="chart-heading"><div><h3>Application Overview</h3><p>Number of applications by result.</p></div></div><div class="chart-container"><canvas id="predictionChart"></canvas></div></article>
             </div>
-
         </section>
 
-
-        <!-- ADMIN APPLICATION HISTORY -->
-        <section
-            id="history"
-            class="dashboard-section"
-            data-admin-only
-            hidden
-        >
-
-            <div class="section-header">
-
-                <div>
-                    <p class="section-label">
-                        APPLICATION DATABASE
-                    </p>
-
-                    <h2>Recent Applications</h2>
-
-                    <p>
-                        Applicant and prediction history.
-                    </p>
-                </div>
-
-                <button
-                    type="button"
-                    class="refresh-button"
-                    onclick="refreshDashboard()"
-                >
-                    Refresh
-                </button>
-
-            </div>
-
-
+        <section id="history" class="dashboard-section" data-admin-only hidden>
+            <div class="section-header"><div><p class="section-label">APPLICATION DATABASE</p><h2>Recent Applications</h2><p>Applicant and prediction history. This section is restricted to administrators.</p></div><button type="button" class="refresh-button" onclick="refreshDashboard()"><span aria-hidden="true">↻</span> Refresh</button></div>
             <div class="table-container">
-
-                <table>
-
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Applicant</th>
-                            <th>Contact</th>
-                            <th>Income</th>
-                            <th>Loan</th>
-                            <th>Credit</th>
-                            <th>Result</th>
-                            <th>Risk</th>
-                            <th>Approval</th>
-                            <th>Date</th>
-                        </tr>
-                    </thead>
-
-                    <tbody id="applicationsTable">
-                        <tr>
-                            <td colspan="10" class="loading">
-                                Admin login required.
-                            </td>
-                        </tr>
-                    </tbody>
-
+                <table id="applicationsTableElement">
+                    <thead><tr><th>ID</th><th>Applicant</th><th>Contact</th><th>Income</th><th>Loan</th><th>Credit</th><th>Result</th><th>Risk</th><th>Approval</th><th>Date</th></tr></thead>
+                    <tbody id="applicationsTable"><tr><td colspan="10" class="loading">Admin login required.</td></tr></tbody>
                 </table>
-
             </div>
-
         </section>
-
+        <footer class="page-footer"><span>Loan AI Management System</span><span>AI-assisted assessment · Administrative records are restricted</span></footer>
     </main>
-
-
-    <!-- CHART.JS -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-    <!-- APPLICATION JAVASCRIPT -->
     <script src="script.js"></script>
-
 </body>
 </html>
