@@ -321,14 +321,14 @@ Any real-world deployment would require appropriate model validation, fairness t
 
 ## Author
 
-**Your Name**
+**Sylvester Ojwang**
 
 BBIT Student | Data Science | Machine Learning | Backend Development | Database Systems
 
 This project demonstrates practical experience integrating machine learning, APIs, databases, frontend development, and cloud deployment into one application.
 
-- GitHub: 
-- LinkedIn: 
+- GitHub: https://github.com/sylvester513/loan-ai-management-system.git
+- LinkedIn:https://www.linkedin.com/in/sylvester-ojwang-123546443 
 
 ---
 
